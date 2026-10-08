@@ -47,19 +47,19 @@
 ## 📸 截图
 
 ### 深色科技
-![深色科技](docs/screenshots/theme-dark.png)
+![深色科技](docs/screenshots/theme-dark.png?v=111)
 
 ### 精致纸张
-![精致纸张](docs/screenshots/theme-paper.png)
+![精致纸张](docs/screenshots/theme-paper.png?v=111)
 
 ### 工程蓝图
-![工程蓝图](docs/screenshots/theme-blueprint.png)
+![工程蓝图](docs/screenshots/theme-blueprint.png?v=111)
 
 ### 英文界面（English）
-![English UI](docs/screenshots/theme-dark-en.png)
+![English UI](docs/screenshots/theme-dark-en.png?v=111)
 
 ### 批量导入公式
-![批量导入](docs/screenshots/batch-import.png)
+![批量导入](docs/screenshots/batch-import.png?v=111)
 
 ## 🚀 使用
 
