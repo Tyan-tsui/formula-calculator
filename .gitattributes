@@ -1,0 +1,14 @@
+# 统一换行符，避免跨平台差异
+* text=auto eol=lf
+
+# 二进制文件不做换行转换
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.ico binary
+*.exe binary
+*.asar binary
+
+# 语言统计（GitHub 上把 HTML 视为主要语言）
+*.html linguist-detectable=true
+*.js linguist-detectable=true
