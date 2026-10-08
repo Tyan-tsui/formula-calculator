@@ -444,6 +444,42 @@ main::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:5px}
 .mrow{display:flex;gap:9px;justify-content:flex-end;margin-top:6px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
+/* ===== 语言切换 ===== */
+.topbar-right{display:flex;align-items:center;gap:8px}
+.lang-switch{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
+.lang-switch button{border:none;background:none;color:var(--mut);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;transition:all .14s}
+.lang-switch button:hover{color:var(--ink)}
+.lang-switch button.active{background:var(--accent-soft);color:var(--ink-strong)}
+
+/* ===== 侧栏按钮行 ===== */
+.addrow{display:flex;gap:7px}
+.addrow .add{flex:1;padding:9px 6px;white-space:nowrap;font-size:12px}
+
+/* ===== 批量导入弹窗 ===== */
+.modalbox.wide{width:min(760px,94vw);max-height:88vh;overflow-y:auto}
+.imtabs{display:flex;gap:6px}
+.imtabs button{flex:1;border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);border-radius:9px;padding:7px;font-size:13px;cursor:pointer;transition:all .13s}
+.imtabs button:hover{border-color:var(--accent);color:var(--accent)}
+.imtabs button.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+#imText{width:100%;font-family:var(--font-mono);font-size:12.5px;padding:10px 12px;border:1.5px solid var(--input-border);border-radius:10px;background:var(--input-bg);color:var(--ink);outline:none;resize:vertical;line-height:1.7}
+#imText:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.imtip{margin-top:8px;font-size:11.5px;color:var(--mut);line-height:1.9}
+.imtip code{font-family:var(--font-mono);font-size:11px;background:var(--card-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.imrow{display:flex;gap:10px;flex-wrap:wrap}
+.imrow label{flex:1;min-width:150px}
+.imstat{font-size:12.5px;color:var(--mut);padding:8px 2px}
+.imstat b{color:var(--accent);font-size:14px}
+.imstat .warn{color:var(--accent2)}
+.imtablewrap{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--card-2)}
+.imtable{width:100%;border-collapse:collapse;font-size:12px}
+.imtable th{position:sticky;top:0;background:var(--card);color:var(--mut);font-weight:600;text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+.imtable td{padding:6px 10px;border-bottom:1px solid var(--line);color:var(--ink);vertical-align:top}
+.imtable tr:last-child td{border-bottom:none}
+.imtable .imname{font-weight:600;white-space:nowrap}
+.imtable .imformula{font-family:var(--font-formula);color:var(--formula-ink);word-break:break-all}
+.imtable tr.bad td{color:var(--accent2);background:var(--accent2-soft)}
+.hidden{display:none!important}
+
 /* ===== 响应式 ===== */
 @media (max-width:760px){
   body{overflow:auto}
@@ -485,7 +521,10 @@ main::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:5px}
       <div class="sigrow"><span>结果有效数字</span>
         <select id="sig"><option value="2">2 位</option><option value="3" selected>3 位</option><option value="4">4 位</option></select>
       </div>
-      <button class="add" id="addBtn">＋ 自定义公式</button>
+      <div class="addrow">
+        <button class="add" id="addBtn">＋ 自定义公式</button>
+        <button class="add" id="importBtn">⇪ 批量导入</button>
+      </div>
     </div>
   </aside>
 
@@ -495,10 +534,16 @@ main::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:5px}
         <h2 id="viewTitle">全部公式</h2>
         <span class="result-count" id="resultCount"></span>
       </div>
-      <div class="theme-switch" id="themeSwitch" role="tablist" aria-label="切换主题">
-        <button data-theme="dark" class="active" style="--c:#4CC2FF"><span class="dot"></span><span>深色</span></button>
-        <button data-theme="paper" style="--c:#1F6F62"><span class="dot"></span><span>纸张</span></button>
-        <button data-theme="blueprint" style="--c:#1565C0"><span class="dot"></span><span>蓝图</span></button>
+      <div class="topbar-right">
+        <div class="lang-switch" id="langSwitch" role="group" aria-label="语言">
+          <button data-lang="zh" class="active">中</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <div class="theme-switch" id="themeSwitch" role="tablist" aria-label="切换主题">
+          <button data-theme="dark" class="active" style="--c:#4CC2FF"><span class="dot"></span><span>深色</span></button>
+          <button data-theme="paper" style="--c:#1F6F62"><span class="dot"></span><span>纸张</span></button>
+          <button data-theme="blueprint" style="--c:#1565C0"><span class="dot"></span><span>蓝图</span></button>
+        </div>
       </div>
     </div>
 
@@ -569,6 +614,45 @@ main::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:5px}
     <label>公式（标准写法，如 E = mc²）<input id="cPlain" placeholder="E = mc²"></label>
     <label>LaTeX（可留空）<input id="cLatex" placeholder="E=mc^{2}"></label>
     <div class="mrow"><button class="btn primary" id="cOk">保存</button><button class="btn" id="cCancel">取消</button></div>
+  </div>
+</div>
+
+<div class="modal hidden" id="importModal">
+  <div class="modalbox wide">
+    <h3>批量导入公式</h3>
+    <div class="imtabs" id="imTabs">
+      <button data-imtab="paste" class="active">粘贴文本</button>
+      <button data-imtab="file">上传文件</button>
+    </div>
+
+    <div id="imPanePaste">
+      <textarea id="imText" rows="5" placeholder="把每行一条公式粘贴到这里，格式：名称 | 公式（分类可省略）" spellcheck="false"></textarea>
+      <div class="imtip">示例：<code>一元二次方程求根公式 | x = (-b ± √(b²-4ac))/(2a)</code><br>只填名称和公式即可，分类用下方下拉框统一指定；也支持 Excel / CSV 表格、带序号的行。</div>
+    </div>
+
+    <div id="imPaneFile" class="hidden">
+      <button class="btn primary" id="imPick">选择文件</button>
+      <span class="bmut" id="imFileName">支持 .txt / .md / .csv / .json / .docx / .xlsx</span>
+      <input type="file" id="imInput" accept=".txt,.md,.markdown,.csv,.json,.docx,.xlsx" style="display:none">
+    </div>
+
+    <div class="imrow">
+      <label>本批公式归到哪一类<select id="imCat"></select></label>
+      <label>重复处理<select id="imDup">
+        <option value="skip">跳过重复</option>
+        <option value="overwrite">覆盖同名</option>
+        <option value="keep">全部保留</option>
+      </select></label>
+    </div>
+
+    <div class="imstat" id="imStat">实时预览</div>
+    <div class="imtablewrap"><table class="imtable" id="imTable"></table></div>
+
+    <div class="mrow">
+      <button class="btn" id="imTemplate">下载模板</button>
+      <button class="btn primary" id="imOk">确认导入</button>
+      <button class="btn" id="imCancel">取消</button>
+    </div>
   </div>
 </div>
 
@@ -1140,6 +1224,98 @@ function beautyUpdate(){
 }
 
 /* =====================================================================
+   国际化 (i18n) — 中英双语
+   策略：字典以【中文原文】为键，英文为值。界面与公式数据共用一张表。
+   ===================================================================== */
+const I18N_EN = {"数学·代数":"Math · Algebra","数学·几何":"Math · Geometry","数学·三角":"Math · Trigonometry","数学·微积分":"Math · Calculus","数学·线性代数":"Math · Linear Algebra","数学·概率统计":"Math · Probability & Statistics","物理·误差分析":"Physics · Error Analysis","物理·电学":"Physics · Electricity","物理·力学":"Physics · Mechanics","物理·热学":"Physics · Thermodynamics","物理·光学":"Physics · Optics","物理·近代":"Physics · Modern Physics","数学·级数与数列":"Math · Series & Sequences","数学·微分方程":"Math · Differential Equations","数学·复变函数":"Math · Complex Analysis","数学·离散数学":"Math · Discrete Mathematics","数学·常用积分表":"Math · Integral Tables","化学·无机化学":"Chemistry · Inorganic Chemistry","化学·有机化学":"Chemistry · Organic Chemistry","化学·分析化学":"Chemistry · Analytical Chemistry","生物·生物化学":"Biology · Biochemistry","工程·电路分析":"Engineering · Circuit Analysis","工程·流体力学":"Engineering · Fluid Mechanics","工程·材料力学":"Engineering · Mechanics of Materials","经济·经济学":"Economics · General","经济·金融数学":"Economics · Financial Mathematics","药学·药剂学":"Pharmacy · Pharmaceutics","药学·药代动力学":"Pharmacy · Pharmacokinetics","药学·药理学":"Pharmacy · Pharmacology","医学·医学统计":"Medicine · Medical Statistics","医学·临床药学":"Medicine · Clinical Pharmacy","二次项系数":"Quadratic coefficient","一次项系数":"Linear coefficient","常数项":"Constant term","方程的根":"Roots of the equation","（+根）":"(+ root)","判别式":"Discriminant","方程的两根":"The two roots","任意实数":"Any real number","底数":"Base","指数":"Exponent","指数m":"Exponent m","指数n":"Exponent n","（a^(m+n)）":"(a^(m+n))","（a^(mn)）":"(a^(mn))","（a^(m-n)）":"(a^(m-n))","真数":"Argument","（右端值）":"(right-hand side)","原底数":"Original base","新底数":"New base","（以 c 为底）":"(base c)","前n项和":"Sum of first n terms","首项":"First term","第n项":"n-th term","项数":"Number of terms","首项a₁":"First term a₁","末项aₙ":"Last term aₙ","公比":"Common ratio","元素总数":"Total elements","选取个数":"Number selected","排列数":"Permutations","总数n":"Total n","选取m":"Selected m","组合数":"Combinations","幂次":"Power","任意数":"Any number","斜边":"Hypotenuse","直角边":"Leg","直角边a":"Leg a","直角边b":"Leg b","周长":"Perimeter","半径":"Radius","面积":"Area","弧长":"Arc length","圆心角":"Central angle","圆心角(弧度)":"Central angle (rad)","底边长":"Base length","高":"Height","三边长":"Three side lengths","半周长":"Semi-perimeter","边长a":"Side a","边长b":"Side b","边长c":"Side c","每个内角":"Each interior angle","边数":"Number of sides","体积":"Volume","棱长":"Edge length","长":"Length","宽":"Width","侧面积":"Lateral area","母线长":"Slant height","表面积":"Surface area","距离":"Distance","点1坐标":"Coordinates of point 1","点2坐标":"Coordinates of point 2","直线 Ax+By+C=0 系数":"Coefficients of line Ax+By+C=0","点坐标":"Point coordinates","平面 Ax+By+Cz+D=0 系数":"Coefficients of plane Ax+By+Cz+D=0","任意角":"Any angle","角度":"Angle","对边":"Opposite side","对应角":"Corresponding angle","两边":"Two sides","对角 C 的边":"Side opposite angle C","夹角":"Included angle","夹角C":"Included angle C","常数指数":"Constant exponent","常数":"Constant","自然常数":"Euler's number","自变量":"Independent variable","可导函数":"Differentiable function","复合函数 y=y(u)":"Composite function y=y(u)","中间变量 u=u(x)":"Intermediate variable u=u(x)","积分常数":"Constant of integration","f 的原函数":"Antiderivative of f","下限":"Lower limit","上限":"Upper limit","展开点":"Expansion point","一阶导数":"First derivative","矩阵元素":"Matrix element","第一行元素":"First-row elements","第二行元素":"Second-row elements","第三行元素":"Third-row elements","矩阵":"Matrix","乘积矩阵":"Product matrix","转置矩阵":"Transpose matrix","A 的元素":"Elements of A","逆矩阵":"Inverse matrix","方阵":"Square matrix","特征值":"Eigenvalue","单位矩阵":"Identity matrix","系数行列式":"Coefficient determinant","第 i 列替换后的行列式":"Determinant with column i replaced","向量":"Vector","平均数":"Mean","各数据":"Data values","数据个数":"Number of data points","总体方差":"Population Variance","样本方差":"Sample Variance","样本容量":"Sample size","样本标准差":"Sample Standard Deviation","两个变量":"Two variables","各自的平均数":"Respective means","相关系数":"Correlation Coefficient","标准差":"Standard Deviation","先验概率":"Prior probability","后验概率":"Posterior probability","完备事件组":"Complete set of events","任意事件":"Any event","试验次数":"Number of trials","成功次数":"Number of successes","单次成功概率":"Success probability per trial","成功概率":"Probability of success","平均发生次数":"Average number of occurrences","发生次数":"Number of occurrences","均值":"Mean","取值":"Value","对应概率":"Corresponding probability","斜率":"Slope","截距":"Intercept","测量值":"Measured value","真值/标准值":"True / standard value","绝对误差":"Absolute Error","标准值":"Standard value","真值":"True value","相对误差":"Relative Error","百分误差":"Percentage Error","各测量值":"Measured values","平均值":"Average","测量次数":"Number of measurements","标准偏差":"Standard Deviation","平均值的标准偏差":"Standard Deviation of the Mean","A 类标准不确定度":"Type A standard uncertainty","仪器误差限":"Instrument error limit","B 类标准不确定度":"Type B standard uncertainty","各分量不确定度":"Component uncertainties","合成标准不确定度":"Combined Standard Uncertainty","包含因子":"Coverage factor","扩展不确定度":"Expanded Uncertainty","包含因子k":"Coverage factor k","测量平均值":"Mean of measurements","相对不确定度":"Relative Uncertainty","各偏导数":"Partial derivatives","各直接测量不确定度":"Uncertainties of direct measurements","数据点数":"Number of data points","点数n":"Number of points n","斜率b":"Slope b","等间隔测量值":"Equally spaced measurements","每周期变化量":"Change per period","电压":"Voltage","电流":"Current","电阻":"Resistance","各电阻":"Resistances","总电阻":"Total resistance","总电压":"Total voltage","某电阻":"A certain resistor","总电流":"Total current","电阻率":"Resistivity","长度":"Length","横截面积":"Cross-sectional area","截面积":"Cross-sectional area","待测电阻":"Unknown resistance","标准电阻":"Standard resistance","比例臂电阻":"Ratio-arm resistance","标准电阻R₀":"Standard resistance R₀","比例臂R₁":"Ratio arm R₁","比例臂R₂":"Ratio arm R₂","检流计偏转格数":"Galvanometer deflection (divisions)","电阻改变量":"Change in resistance","电阻值":"Resistance value","灵敏度":"Sensitivity","偏转格数":"Deflection divisions","待测电动势":"Unknown EMF","标准电池电动势":"Standard cell EMF","补偿长度":"Compensation length","标准电动势":"Standard EMF","流入节点电流":"Current into node","流出节点电流":"Current out of node","回路各段电压":"Voltage across each loop segment","电功":"Electric Work","时间":"Time","电功率":"Electric Power","热量":"Heat","电流表内阻":"Ammeter internal resistance","表内阻":"Meter internal resistance","电压表内阻":"Voltmeter resistance","半偏时电阻箱读数":"Resistance box reading at half deflection","电池电动势":"Battery EMF","偏转电流":"Deflection current","欧姆表内阻":"Ohmmeter internal resistance","被测电阻":"Measured resistance","时间常数":"Time constant","电容":"Capacitance","电源电压":"Supply voltage","初始电压":"Initial voltage","电感":"Inductance","谐振频率":"Resonant frequency","谐振角频率":"Resonant angular frequency","感抗":"Inductive Reactance","角频率":"Angular frequency","频率":"Frequency","容抗":"Capacitive Reactance","阻抗":"Impedance","感抗/容抗":"Inductive / capacitive reactance","峰值电压":"Peak voltage","有效值":"RMS value","峰值":"Peak value","峰值电流":"Peak current","峰峰值":"Peak-to-peak value","有功功率":"Active power","电压电流":"Voltage and current","线电压":"Line voltage","相电压":"Phase voltage","原/副线圈电压":"Primary / secondary voltage","原/副线圈匝数":"Primary / secondary turns","原边电压":"Primary voltage","原边匝数":"Primary turns","副边匝数":"Secondary turns","原/副线圈电流":"Primary / secondary current","匝数":"Number of turns","原边电流":"Primary current","线圈匝数":"Coil turns","磁通量":"Magnetic flux","感应电动势":"Induced EMF","自感系数":"Self-inductance","电流变化率":"Rate of change of current","互感系数":"Mutual inductance","原线圈电流变化率":"Rate of change of primary current","霍尔系数":"Hall coefficient","磁感应强度":"Magnetic flux density","厚度":"Thickness","霍尔电压":"Hall voltage","霍尔灵敏度":"Hall sensitivity","工作电流":"Operating current","反向饱和电流":"Reverse saturation current","温度电压当量":"Thermal voltage","饱和电流":"Saturation current","参考温度电阻":"Resistance at reference temperature","材料常数":"Material constant","温度":"Temperature","参考温度":"Reference temperature","参考电阻":"Reference resistance","B值":"B value","周期":"Period","两信号频率":"Frequencies of two signals","图形切点数":"Number of tangent points","整流平均值":"Rectified average","电动势":"EMF","内阻":"Internal resistance","路端电压":"Terminal voltage","储能":"Stored energy","初速度":"Initial velocity","加速度":"Acceleration","末速度":"Final velocity","位移":"Displacement","下落高度":"Fall height","重力加速度":"Gravitational acceleration","合外力":"Net external force","质量":"Mass","弹力":"Elastic force","劲度系数":"Spring constant","形变量":"Deformation","伸长量":"Extension","动量":"Momentum","速度":"Velocity","作用时间":"Action time","末/初速度":"Final / initial velocity","两物体质量":"Masses of two bodies","碰撞前速度":"Velocity before collision","碰撞后速度":"Velocity after collision","动能":"Kinetic energy","重力势能":"Gravitational Potential Energy","高度":"Height","万有引力常量":"Gravitational constant","质量m₁":"Mass m₁","质量m₂":"Mass m₂","向心力":"Centripetal Force","线速度":"Linear velocity","摆长":"Pendulum length","振幅":"Amplitude","初相":"Initial phase","合外力矩":"Net external torque","转动惯量":"Moment of inertia","角加速度":"Angular acceleration","杆长":"Rod length","角动量":"Angular Momentum","角速度":"Angular velocity","圆盘质量":"Disk mass","上下圆盘半径":"Radii of upper / lower disks","扭转周期":"Torsion period","悬线长度":"Suspension wire length","上盘半径":"Upper disk radius","下盘半径":"Lower disk radius","功":"Work","力":"Force","力与位移夹角":"Angle between force and displacement","功率":"Power","摩擦力":"Friction force","动摩擦因数":"Kinetic friction coefficient","正压力":"Normal force","摩擦因数":"Friction coefficient","拉力":"Tension","原长":"Natural length","杨氏模量":"Young's Modulus","压强":"Pressure","物质的量":"Amount of Substance","气体常量":"Gas constant","热力学温度":"Thermodynamic temperature","初状态":"Initial state","末状态":"Final state","初压强":"Initial pressure","初体积":"Initial volume","末压强":"Final pressure","初温度":"Initial temperature","末温度":"Final temperature","内能变化":"Change in internal energy","吸热量":"Heat absorbed","外界对气体做功":"Work done on the gas","外界做功":"External work","比热容":"Specific heat capacity","温度变化":"Temperature change","比热比":"Heat capacity ratio","定压摩尔热容":"Molar heat capacity at constant pressure","定容摩尔热容":"Molar heat capacity at constant volume","初始温度":"Initial temperature","环境温度":"Ambient temperature","冷却系数":"Cooling coefficient","低温物体":"Cold body","高温物体":"Hot body","平衡温度":"Equilibrium temperature","汽化热":"Heat of vaporization","物距":"Object distance","像距":"Image distance","焦距":"Focal length","物屏与像屏距离":"Object-to-screen distance","两次成像透镜移动距离":"Lens displacement between two images","放大率":"Magnification","折射率":"Refractive index","入射角":"Angle of incidence","折射角":"Angle of refraction","临界角":"Critical angle","光密介质折射率":"Refractive index of denser medium","光疏介质折射率":"Refractive index of rarer medium","相邻条纹处空气膜厚度差":"Air-film thickness difference between adjacent fringes","波长":"Wavelength","第 m、n 级暗环直径":"Diameters of m-th and n-th dark rings","透镜曲率半径":"Radius of curvature of the lens","条纹间距":"Fringe spacing","缝屏距离":"Slit-to-screen distance","缝间距":"Slit separation","缝屏距":"Slit-to-screen distance","光栅常数":"Grating constant","衍射角":"Diffraction angle","级次":"Order","棱镜顶角":"Prism apex angle","最小偏向角":"Angle of minimum deviation","顶角A":"Apex angle A","入射光强":"Incident light intensity","出射光强":"Transmitted light intensity","偏振片夹角":"Angle between polarizers","布儒斯特角":"Brewster's Angle","镜移动距离":"Mirror displacement","条纹移动数":"Number of fringe shifts","条纹数":"Number of fringes","缝宽":"Slit width","暗纹级次":"Dark fringe order","最小分辨角":"Minimum resolvable angle","孔径直径":"Aperture diameter","孔径":"Aperture","角秒":"arcsec","能量":"Energy","光速":"Speed of light","普朗克常量":"Planck constant","光电子最大动能":"Maximum kinetic energy of photoelectron","光子频率":"Photon frequency","逸出功":"Work function","遏止电压":"Stopping Voltage","元电荷":"Elementary charge","光子能量":"Photon energy","高低能级":"Energy levels","辐射频率":"Radiation frequency","初始核数":"Initial number of nuclei","衰变常数":"Decay constant","剩余核数":"Remaining nuclei","半衰期":"Half-Life","顶点横坐标":"Vertex x-coordinate","顶点纵坐标":"Vertex y-coordinate","三边":"Three sides","圆心":"Center","底面半径":"Base radius","外接圆半径":"Circumradius","第一行第一列":"Row 1, Column 1","第一行第二列":"Row 1, Column 2","第二行第一列":"Row 2, Column 1","第二行第二列":"Row 2, Column 2","失效率":"Failure rate","模":"Modulus","辐角":"Argument","质量(g)":"Mass (g)","摩尔质量(g/mol)":"Molar mass (g/mol)","物质的量(mol)":"Amount of substance (mol)","体积(L)":"Volume (L)","压强(Pa)":"Pressure (Pa)","体积(m³)":"Volume (m³)","温度(K)":"Temperature (K)","浓度(mol/L)":"Concentration (mol/L)","[H+]浓度(mol/L)":"[H⁺] concentration (mol/L)","标准电动势(V)":"Standard EMF (V)","转移电子数":"Number of electrons transferred","反应商":"Reaction Quotient","焓变(kJ/mol)":"Enthalpy change (kJ/mol)","熵变(kJ/mol·K)":"Entropy change (kJ/mol·K)","摩尔吸光系数":"Molar absorptivity","光程(cm)":"Path length (cm)","透光率(0~1)":"Transmittance (0–1)","浓度1(mol/L)":"Concentration 1 (mol/L)","体积1(mL)":"Volume 1 (mL)","浓度2(mol/L)":"Concentration 2 (mol/L)","最大速率":"Maximum rate","米氏常数":"Michaelis constant","底物浓度":"Substrate concentration","消除速率常数":"Elimination rate constant","电阻(Ω)":"Resistance (Ω)","电容(F)":"Capacitance (F)","密度(kg/m³)":"Density (kg/m³)","流速(m/s)":"Flow velocity (m/s)","管径(m)":"Pipe diameter (m)","黏度(Pa·s)":"Viscosity (Pa·s)","表面压(Pa)":"Surface pressure (Pa)","深度(m)":"Depth (m)","弹性模量(GPa)":"Elastic modulus (GPa)","应变":"Strain","力(N)":"Force (N)","截面积(mm²)":"Cross-sectional area (mm²)","现值":"Present value","利率":"Interest rate","期数":"Number of periods","无风险利率":"Risk-free rate","贝塔":"Beta","市场收益":"Market return","高温热源(K)":"Hot reservoir (K)","低温热源(K)":"Cold reservoir (K)","浓液浓度":"Concentrated solution concentration","浓液体积(mL)":"Concentrated solution volume (mL)","稀液浓度":"Diluted solution concentration","体重(kg)":"Body weight (kg)","身高(cm)":"Height (cm)","身高(m)":"Height (m)","A类":"Type A","B类":"Type B","一元二次方程求根公式":"Quadratic Formula","一元二次方程判别式":"Quadratic Discriminant","韦达定理":"Vieta's Formulas","完全平方和":"Perfect Square (Sum)","完全平方差":"Perfect Square (Difference)","平方差公式":"Difference of Squares","立方和公式":"Sum of Cubes","立方差公式":"Difference of Cubes","完全立方和":"Perfect Cube (Sum)","同底数幂相乘":"Product of Powers (Same Base)","幂的乘方":"Power of a Power","同底数幂相除":"Quotient of Powers (Same Base)","对数运算法则（乘）":"Logarithm Rule (Product)","对数运算法则（除）":"Logarithm Rule (Quotient)","对数换底公式":"Change of Base Formula","等差数列求和":"Arithmetic Series Sum","等比数列求和":"Geometric Series Sum","二项式定理":"Binomial Theorem","完全立方差":"Perfect Cube (Difference)","立方和分解":"Sum of Cubes (Factoring)","立方差分解":"Difference of Cubes (Factoring)","三项完全平方":"Square of a Trinomial","配方法":"Completing the Square","二次函数顶点式":"Quadratic Vertex Form","二次函数对称轴":"Axis of Symmetry","二次函数最值":"Quadratic Extremum","两根之差":"Difference of Roots","绝对值三角不等式":"Triangle Inequality (Absolute Value)","柯西不等式(二维)":"Cauchy–Schwarz Inequality (2D)","柯西不等式(三维)":"Cauchy–Schwarz Inequality (3D)","平方均值不等式":"RMS–AM Inequality","对数恒等式":"Logarithmic Identity","对数乘法":"Logarithm of a Product","对数除法":"Logarithm of a Quotient","对数幂":"Logarithm of a Power","根式与幂转换":"Radical to Power Conversion","负指数":"Negative Exponent","零指数":"Zero Exponent","复数除法":"Complex Division","复数模的积":"Product of Complex Moduli","共轭与模":"Conjugate and Modulus","棣莫弗定理":"De Moivre's Theorem","欧拉公式":"Euler's Formula","欧拉恒等式":"Euler's Identity","二阶行列式":"2×2 Determinant","三阶行列式":"3×3 Determinant","合比定理":"Componendo","分比定理":"Dividendo","等比性质":"Equal Ratios Property","三次方程韦达定理":"Vieta's Formulas (Cubic)","高斯求和":"Gauss Summation","奇数和":"Sum of Odd Numbers","平方和公式":"Sum of Squares","立方和公式·变式":"Sum of Cubes (Variant)","勾股定理":"Pythagorean Theorem","圆周长":"Circumference","圆面积":"Circle Area","扇形弧长":"Sector Arc Length","扇形面积":"Sector Area","三角形面积（底高）":"Triangle Area (Base × Height)","海伦公式":"Heron's Formula","正多边形内角":"Interior Angle of a Regular Polygon","长方体体积":"Rectangular Prism Volume","圆柱体":"Cylinder","圆锥体":"Cone","球体":"Sphere","两点间距离":"Distance Between Two Points","点到直线距离":"Point-to-Line Distance","点到平面距离":"Point-to-Plane Distance","中点坐标":"Midpoint Coordinates","两点式直线":"Two-Point Line Equation","三角形外接圆半径":"Circumradius of a Triangle","三角形内切圆半径":"Inradius of a Triangle","中线长公式":"Median Length Formula","角平分线长":"Angle Bisector Length","圆标准方程":"Circle Standard Equation","圆一般方程":"Circle General Equation","圆参数方程":"Circle Parametric Equation","扇形弧长·变式":"Sector Arc Length (Variant)","扇形面积·变式":"Sector Area (Variant)","椭圆标准方程":"Ellipse Standard Equation","椭圆离心率":"Ellipse Eccentricity","椭圆面积":"Ellipse Area","双曲线标准方程":"Hyperbola Standard Equation","双曲线渐近线":"Hyperbola Asymptotes","抛物线标准方程":"Parabola Standard Equation","球体积":"Sphere Volume","球表面积":"Sphere Surface Area","圆柱体积":"Cylinder Volume","圆锥体积":"Cone Volume","圆台体积":"Frustum Volume","棱锥体积":"Pyramid Volume","棱台体积":"Truncated Pyramid Volume","空间两点距离":"Distance in 3D Space","向量点积":"Vector Dot Product","向量叉积模":"Vector Cross Product Magnitude","同角基本恒等式（正弦余弦）":"Pythagorean Identity (sin, cos)","同角基本恒等式（正割）":"Pythagorean Identity (sec)","同角基本恒等式（余割）":"Pythagorean Identity (csc)","商数关系":"Quotient Identities","正弦定理":"Law of Sines","余弦定理":"Law of Cosines","两角和正弦":"Sine of Sum","两角和余弦":"Cosine of Sum","两角差正弦":"Sine of Difference","两角差余弦":"Cosine of Difference","二倍角正弦":"Double Angle (Sine)","二倍角余弦":"Double Angle (Cosine)","二倍角正切":"Double Angle (Tangent)","半角公式（正弦）":"Half Angle (Sine)","积化和差（正余弦）":"Product to Sum (sin·cos)","和差化积（正弦和）":"Sum to Product (sine)","两角和正切":"Tangent of Sum","两角差正切":"Tangent of Difference","二倍角余弦·变式":"Double Angle (Cosine, Variant)","半角正弦":"Half Angle Sine","半角余弦":"Half Angle Cosine","降幂公式":"Power Reduction Formulas","辅助角公式":"Auxiliary Angle Formula","积化和差·sin":"Product to Sum (sin A cos B)","积化和差·cos":"Product to Sum (cos A sin B)","积化和差·coscos":"Product to Sum (cos A cos B)","积化和差·sinsin":"Product to Sum (sin A sin B)","和差化积·sin":"Sum to Product (sin A + sin B)","和差化积·sin差":"Sum to Product (sin A − sin B)","和差化积·cos":"Sum to Product (cos A + cos B)","和差化积·cos差":"Sum to Product (cos A − cos B)","同角·正割":"Same-Angle Identity (sec)","同角·余割":"Same-Angle Identity (csc)","万能公式":"Universal Substitution","正弦定理·外接圆":"Law of Sines (Circumradius)","三角形面积·两边夹角":"Triangle Area (Two Sides, Included Angle)","反三角关系":"Inverse Trigonometric Relations","正切反三角关系":"Inverse Tangent Relations","导数·幂函数":"Derivative of a Power Function","导数·常数":"Derivative of a Constant","导数·指数函数":"Derivative of an Exponential","导数·对数函数":"Derivative of a Logarithm","导数·正弦":"Derivative of Sine","导数·余弦":"Derivative of Cosine","导数·正切":"Derivative of Tangent","导数·乘积法则":"Derivative — Product Rule","导数·商法则":"Derivative — Quotient Rule","导数·链式法则":"Derivative — Chain Rule","不定积分·幂函数":"Integral of a Power Function","不定积分·指数函数":"Integral of an Exponential","不定积分·正弦":"Integral of Sine","不定积分·余弦":"Integral of Cosine","不定积分·1/x":"Integral of 1/x","分部积分法":"Integration by Parts","牛顿-莱布尼茨公式":"Newton–Leibniz Formula","泰勒展开":"Taylor Expansion","麦克劳林展开（e^x）":"Maclaurin Series (e^x)","重要极限（正弦）":"Key Limit (sine)","乘法法则":"Product Rule","商法则":"Quotient Rule","链式法则":"Chain Rule","幂函数导数":"Power Rule","指数函数导数":"Exponential Derivative","一般指数导数":"General Exponential Derivative","自然对数导数":"Natural Logarithm Derivative","一般对数导数":"General Logarithm Derivative","正弦导数":"Sine Derivative","余弦导数":"Cosine Derivative","正切导数":"Tangent Derivative","余切导数":"Cotangent Derivative","正割导数":"Secant Derivative","余割导数":"Cosecant Derivative","反正弦导数":"Arcsine Derivative","反余弦导数":"Arccosine Derivative","反正切导数":"Arctangent Derivative","双曲正弦导数":"Hyperbolic Sine Derivative","双曲余弦导数":"Hyperbolic Cosine Derivative","双曲正切导数":"Hyperbolic Tangent Derivative","参数方程求导":"Parametric Differentiation","隐函数求导":"Implicit Differentiation","反函数导数":"Inverse Function Derivative","莱布尼茨高阶导数":"Leibniz Rule (Higher Derivatives)","微积分基本定理":"Fundamental Theorem of Calculus","分部积分":"Integration by Parts","换元积分":"Integration by Substitution","曲率公式":"Curvature Formula","弧长公式":"Arc Length Formula","旋转体体积":"Volume of a Solid of Revolution","平面图形面积":"Area of a Plane Region","极坐标面积":"Area in Polar Coordinates","拉格朗日中值定理":"Lagrange Mean Value Theorem","罗尔定理":"Rolle's Theorem","柯西中值定理":"Cauchy Mean Value Theorem","极值二阶判别":"Second Derivative Test","函数平均值":"Average Value of a Function","变上限积分求导":"Derivative of a Variable-Limit Integral","梯度":"Gradient","方向导数":"Directional Derivative","全微分":"Total Differential","多元链式法则":"Multivariable Chain Rule","格林公式":"Green's Theorem","高斯公式":"Gauss's Divergence Theorem","斯托克斯公式":"Stokes' Theorem","球坐标体积元":"Volume Element in Spherical Coordinates","泰勒公式":"Taylor's Formula","麦克劳林·指数":"Maclaurin Series (exponential)","麦克劳林·正弦":"Maclaurin Series (sine)","麦克劳林·余弦":"Maclaurin Series (cosine)","麦克劳林·对数":"Maclaurin Series (logarithm)","麦克劳林·反正切":"Maclaurin Series (arctangent)","麦克劳林·二项式":"Maclaurin Series (binomial)","重要极限一":"Key Limit 1","重要极限二":"Key Limit 2","双曲函数定义":"Hyperbolic Function Definitions","双曲恒等式":"Hyperbolic Identities","矩阵乘法定义":"Matrix Multiplication","矩阵转置":"Matrix Transpose","逆矩阵（2×2）":"Inverse Matrix (2×2)","特征值方程":"Eigenvalue Equation","克拉默法则":"Cramer's Rule","矩阵乘法":"Matrix Multiplication","转置性质":"Transpose Properties","二阶逆矩阵":"2×2 Inverse Matrix","克莱默法则":"Cramer's Rule","行列式乘积定理":"Determinant Product Theorem","伴随矩阵":"Adjugate Matrix","特征方程":"Characteristic Equation","特征值迹与行列式":"Eigenvalues from Trace and Determinant","特征向量方程":"Eigenvector Equation","相似矩阵":"Similar Matrices","矩阵对角化":"Matrix Diagonalization","施密特正交化":"Gram–Schmidt Orthogonalization","向量内积":"Vector Inner Product","向量范数":"Vector Norm","柯西施瓦茨不等式":"Cauchy–Schwarz Inequality","齐次方程解结构":"Solution Structure of a Homogeneous System","非齐次方程解结构":"Solution Structure of a Non-homogeneous System","矩阵秩性质":"Rank Properties","秩与行列式":"Rank and Determinant","二次型矩阵":"Quadratic Form Matrix","正定判定·特征值":"Positive Definiteness (Eigenvalues)","惯性定理":"Law of Inertia","正交矩阵性质":"Orthogonal Matrix Properties","实对称矩阵特征值":"Eigenvalues of a Real Symmetric Matrix","分块对角行列式":"Block Diagonal Determinant","矩阵迹":"Matrix Trace","最小二乘正规方程":"Normal Equations (Least Squares)","矩阵范数·谱范数":"Spectral Norm","秩不等式":"Rank Inequalities","初等行变换保秩":"Elementary Row Operations Preserve Rank","基础解系":"Fundamental System of Solutions","可逆条件":"Invertibility Conditions","向量组等价":"Equivalent Vector Sets","零矩阵条件":"Zero Matrix Condition","算术平均数":"Arithmetic Mean","协方差":"Covariance","贝叶斯公式":"Bayes' Theorem","全概率公式":"Law of Total Probability","二项分布":"Binomial Distribution","泊松分布":"Poisson Distribution","正态分布概率密度":"Normal Distribution PDF","数学期望（离散）":"Expected Value (Discrete)","最小二乘线性回归":"Least Squares Linear Regression","古典概型":"Classical Probability","条件概率":"Conditional Probability","乘法公式":"Multiplication Rule","全概率公式·变式":"Law of Total Probability (Variant)","贝叶斯公式·变式":"Bayes' Theorem (Variant)","加法公式":"Addition Rule","独立事件":"Independent Events","期望定义":"Definition of Expectation","期望线性性质":"Linearity of Expectation","方差定义":"Definition of Variance","方差性质":"Properties of Variance","协方差·变式":"Covariance (Variant)","相关系数·变式":"Correlation Coefficient (Variant)","切比雪夫不等式":"Chebyshev's Inequality","辛钦大数定律":"Khinchin's Law of Large Numbers","中心极限定理":"Central Limit Theorem","均匀分布密度":"Uniform Distribution PDF","指数分布":"Exponential Distribution","正态分布密度":"Normal Distribution Density","标准正态":"Standard Normal Distribution","正态标准化":"Standardization (Z-score)","三西格玛原则":"Three-Sigma Rule","几何分布":"Geometric Distribution","超几何分布":"Hypergeometric Distribution","样本均值":"Sample Mean","矩估计":"Method of Moments","均值置信区间·σ已知":"Confidence Interval (σ known)","均值置信区间·σ未知":"Confidence Interval (σ unknown)","t统计量":"t-Statistic","卡方统计量":"Chi-Square Statistic","Z统计量":"Z-Statistic","线性回归方程":"Linear Regression Equation","相关系数r":"Correlation Coefficient r","决定系数":"Coefficient of Determination","二项分布期望方差":"Mean and Variance of Binomial","泊松分布期望方差":"Mean and Variance of Poisson","指数分布期望":"Mean of Exponential Distribution","独立变量方差和":"Variance of a Sum of Independent Variables","正态线性组合":"Linear Combination of Normals","条件期望":"Conditional Expectation","二项近似正态":"Normal Approximation to the Binomial","贝叶斯更新":"Bayesian Updating","标准偏差（贝塞尔公式）":"Standard Deviation (Bessel's Formula)","不确定度 A 类评定":"Type A Uncertainty Evaluation","不确定度 B 类评定":"Type B Uncertainty Evaluation","间接测量不确定度传递":"Uncertainty Propagation (Indirect Measurement)","最小二乘线性拟合（斜率）":"Least Squares Fit (Slope)","最小二乘线性拟合（截距）":"Least Squares Fit (Intercept)","逐差法（八组数据）":"Successive Difference Method (8 Data Sets)","A类标准不确定度":"Type A Standard Uncertainty","B类标准不确定度":"Type B Standard Uncertainty","合成标准不确定度·变式":"Combined Standard Uncertainty (Variant)","间接量不确定度传递":"Uncertainty Propagation for Indirect Quantities","相对不确定度·变式":"Relative Uncertainty (Variant)","加权平均误差":"Weighted Mean Error","线性回归斜率":"Linear Regression Slope","线性回归截距":"Linear Regression Intercept","算术平均误差":"Arithmetic Mean Error","测量精密度":"Measurement Precision","欧姆定律":"Ohm's Law","电阻串联":"Resistors in Series","电阻并联":"Resistors in Parallel","串联分压":"Voltage Divider (Series)","并联分流":"Current Divider (Parallel)","惠斯通电桥平衡":"Wheatstone Bridge Balance","电桥灵敏度":"Bridge Sensitivity","电位差计补偿法":"Potentiometer Compensation Method","基尔霍夫电流定律（KCL）":"Kirchhoff's Current Law (KCL)","基尔霍夫电压定律（KVL）":"Kirchhoff's Voltage Law (KVL)","焦耳定律":"Joule's Law","伏安法测电阻":"Voltmeter–Ammeter Method","电流表内接法误差":"Ammeter-Inside Connection Error","电流表外接法误差":"Ammeter-Outside Connection Error","半偏法测电流表内阻":"Half-Deflection Method for Ammeter Resistance","欧姆表原理":"Ohmmeter Principle","RC 时间常数":"RC Time Constant","RC 电路充电过程":"RC Charging Process","RC 电路放电过程":"RC Discharging Process","RL 电路时间常数":"RL Time Constant","RLC 串联谐振频率":"RLC Series Resonant Frequency","RLC 品质因数":"RLC Quality Factor","RLC 串联阻抗":"RLC Series Impedance","交流电压有效值":"AC Voltage RMS","交流电流有效值":"AC Current RMS","交流电压峰峰值":"AC Peak-to-Peak Voltage","功率因数":"Power Factor","三相电（星形联结）":"Three-Phase Power (Star Connection)","变压器电压关系":"Transformer Voltage Ratio","变压器电流关系":"Transformer Current Ratio","法拉第电磁感应定律":"Faraday's Law of Induction","自感电动势":"Self-Induced EMF","互感电动势":"Mutually Induced EMF","霍尔效应":"Hall Effect","霍尔元件测磁感应强度":"Hall Probe Magnetic Field Measurement","PN 结伏安特性":"PN Junction I–V Characteristic","热敏电阻":"Thermistor","示波器信号周期":"Oscilloscope Signal Period","李萨如图形频率比":"Lissajous Frequency Ratio","半波整流平均值":"Half-Wave Rectified Average","电池电动势与内阻":"Battery EMF and Internal Resistance","电感储能":"Inductor Stored Energy","电容储能":"Capacitor Stored Energy","匀变速直线运动·速度":"Uniformly Accelerated Motion — Velocity","匀变速直线运动·位移":"Uniformly Accelerated Motion — Displacement","匀变速直线运动·速度位移":"Uniformly Accelerated Motion — Velocity and Displacement","自由落体":"Free Fall","自由落体速度":"Free Fall Velocity","牛顿第二定律":"Newton's Second Law","胡克定律":"Hooke's Law","动量定理":"Impulse–Momentum Theorem","动量守恒定律":"Conservation of Momentum","机械能守恒":"Conservation of Mechanical Energy","万有引力定律":"Law of Universal Gravitation","单摆周期":"Simple Pendulum Period","弹簧振子周期":"Spring Oscillator Period","简谐运动方程":"Simple Harmonic Motion Equation","转动定律":"Rotational Law","转动惯量·圆盘":"Moment of Inertia (Disk)","转动惯量·细杆":"Moment of Inertia (Thin Rod)","三线摆测转动惯量":"Trifilar Pendulum Moment of Inertia","滑动摩擦力":"Sliding Friction","简谐振动能量":"Energy of Simple Harmonic Motion","受迫振动振幅":"Forced Oscillation Amplitude","开普勒第三定律":"Kepler's Third Law","刚体转动动能":"Rotational Kinetic Energy of a Rigid Body","角动量·变式":"Angular Momentum (Variant)","转动定律·变式":"Rotational Law (Variant)","平行轴定理":"Parallel Axis Theorem","波的干涉条件":"Wave Interference Condition","拍频":"Beat Frequency","理想气体状态方程":"Ideal Gas Law","玻意耳定律":"Boyle's Law","查理定律":"Charles's Law","盖-吕萨克定律":"Gay-Lussac's Law","热力学第一定律":"First Law of Thermodynamics","热量公式":"Heat Formula","气体比热比":"Gas Heat Capacity Ratio","牛顿冷却定律":"Newton's Law of Cooling","混合量热法":"Method of Mixtures","水的汽化热":"Latent Heat of Vaporization of Water","傅里叶热传导定律":"Fourier's Law of Heat Conduction","热传导稳态":"Steady-State Heat Conduction","热对流牛顿冷却":"Convective Cooling (Newton)","玻尔兹曼熵":"Boltzmann Entropy","克劳修斯熵":"Clausius Entropy","麦克斯韦速率分布":"Maxwell Speed Distribution","最概然速率":"Most Probable Speed","平均速率":"Mean Speed","方均根速率":"RMS Speed","分子平均平动动能":"Average Translational Kinetic Energy","平均自由程":"Mean Free Path","范德瓦尔斯方程":"Van der Waals Equation","卡诺热机效率":"Carnot Engine Efficiency","制冷系数":"Coefficient of Performance","克拉珀龙方程":"Clapeyron Equation","克劳修斯克拉珀龙":"Clausius–Clapeyron Equation","薄透镜成像公式":"Thin Lens Equation","共轭法测焦距":"Conjugate Method for Focal Length","透镜放大率":"Lens Magnification","折射定律":"Snell's Law","全反射临界角":"Critical Angle of Total Internal Reflection","劈尖干涉":"Wedge Interference","牛顿环":"Newton's Rings","杨氏双缝干涉":"Young's Double-Slit Interference","光栅方程":"Diffraction Grating Equation","分光计最小偏向角测折射率":"Spectrometer Minimum-Deviation Refractometry","马吕斯定律":"Malus's Law","迈克尔逊干涉":"Michelson Interferometer","单缝夫琅禾费衍射暗纹":"Single-Slit Fraunhofer Diffraction Minima","圆孔衍射分辨极限":"Circular Aperture Resolution Limit","牛顿环半径":"Newton's Rings Radius","劈尖干涉·变式":"Wedge Interference (Variant)","单缝衍射暗纹":"Single-Slit Diffraction Minima","圆孔衍射分辨":"Circular Aperture Diffraction Resolution","爱因斯坦质能方程":"Einstein Mass–Energy Relation","德布罗意波长":"de Broglie Wavelength","光电效应方程":"Photoelectric Effect Equation","玻尔能级跃迁":"Bohr Energy Level Transition","放射性衰变定律":"Radioactive Decay Law","相对论动量":"Relativistic Momentum","相对论能量":"Relativistic Energy","相对论动能":"Relativistic Kinetic Energy","能量动量关系":"Energy–Momentum Relation","洛伦兹因子":"Lorentz Factor","长度收缩":"Length Contraction","时间膨胀":"Time Dilation","氢原子能级":"Hydrogen Energy Levels","里德伯公式":"Rydberg Formula","玻尔频率条件":"Bohr Frequency Condition","光电效应方程·变式":"Photoelectric Effect Equation (Variant)","红限频率":"Threshold Frequency","康普顿散射":"Compton Scattering","斯特藩玻尔兹曼定律":"Stefan–Boltzmann Law","维恩位移定律":"Wien's Displacement Law","普朗克能量子":"Planck Energy Quantum","定态薛定谔方程":"Time-Independent Schrödinger Equation","波函数归一化":"Wavefunction Normalization","无限深势阱能级":"Infinite Square Well Energy Levels","一维谐振子能级":"1D Harmonic Oscillator Energy Levels","衰变规律":"Decay Law","半衰期公式":"Half-Life Formula","放射性活度":"Radioactivity (Activity)","平均寿命":"Mean Lifetime","质量亏损结合能":"Mass Defect and Binding Energy","核反应Q值":"Nuclear Reaction Q-Value","等差数列通项":"Arithmetic Sequence — General Term","等比数列通项":"Geometric Sequence — General Term","无穷等比级数和":"Infinite Geometric Series Sum","p级数收敛性":"p-Series Convergence","调和级数发散":"Harmonic Series Divergence","交错级数判别":"Alternating Series Test","比值判别法":"Ratio Test","根值判别法":"Root Test","收敛必要条件":"Necessary Condition for Convergence","比较判别法":"Comparison Test","幂级数收敛半径":"Power Series Radius of Convergence","交错调和级数":"Alternating Harmonic Series","傅里叶级数":"Fourier Series","傅里叶系数·a₀":"Fourier Coefficient a₀","傅里叶系数·aₙ":"Fourier Coefficient aₙ","傅里叶系数·bₙ":"Fourier Coefficient bₙ","方波傅里叶级数":"Square Wave Fourier Series","调和级数近似":"Harmonic Series Approximation","斯特林公式":"Stirling's Approximation","斐波那契通项":"Fibonacci — General Term","夹逼准则":"Squeeze Theorem","单调有界准则":"Monotone Convergence Theorem","幂级数逐项求导":"Term-by-Term Differentiation","幂级数逐项积分":"Term-by-Term Integration","柯西乘积":"Cauchy Product","绝对收敛":"Absolute Convergence","条件收敛":"Conditional Convergence","极限比较判别":"Limit Comparison Test","积分判别法":"Integral Test","数列极限四则":"Limit Laws for Sequences","几何级数部分和":"Geometric Series Partial Sum","一阶递推通项":"First-Order Recurrence — General Term","泰勒级数收敛":"Taylor Series Convergence","可分离变量方程":"Separable Equation","一阶线性微分方程通解":"First-Order Linear ODE — General Solution","伯努利方程":"Bernoulli's Equation","全微分方程":"Exact Differential Equation","积分因子":"Integrating Factor","可降阶一阶":"Order Reduction (First Order)","可降阶·缺y":"Order Reduction (Missing y)","可降阶·缺x":"Order Reduction (Missing x)","二阶齐次·两实根":"2nd-Order Homogeneous (Distinct Real Roots)","二阶齐次·重根":"2nd-Order Homogeneous (Repeated Root)","二阶齐次·复根":"2nd-Order Homogeneous (Complex Roots)","二阶非齐次解结构":"2nd-Order Non-homogeneous — Solution Structure","常数变易法":"Variation of Parameters","二阶齐次解结构":"2nd-Order Homogeneous — Solution Structure","朗斯基行列式":"Wronskian","欧拉方程":"Euler Equation","谐振方程":"Harmonic Oscillator Equation","阻尼振动方程":"Damped Oscillation Equation","指数试解":"Exponential Trial Solution","逻辑斯蒂方程":"Logistic Equation","指数增长模型":"Exponential Growth Model","牛顿冷却方程":"Newton Cooling Equation","RC电路方程":"RC Circuit Equation","拉普拉斯变换解法":"Laplace Transform Method","解的存在唯一":"Existence and Uniqueness of Solutions","叠加原理":"Superposition Principle","初值条件":"Initial Conditions","一阶差分方程":"First-Order Difference Equation","二阶常系数·特解待定":"2nd-Order Constant Coefficient (Undetermined Particular Solution)","贝塞尔方程":"Bessel Equation","勒让德方程":"Legendre Equation","刘维尔公式":"Liouville's Formula","复数三角形式":"Trigonometric Form of a Complex Number","复数指数形式":"Exponential Form of a Complex Number","复数辐角":"Argument of a Complex Number","柯西黎曼方程":"Cauchy–Riemann Equations","解析函数条件":"Analytic Function Conditions","柯西积分定理":"Cauchy Integral Theorem","柯西积分公式":"Cauchy Integral Formula","高阶导数公式":"Higher Derivative Formula","调和函数方程":"Harmonic Function Equation","留数定义":"Definition of a Residue","留数定理":"Residue Theorem","一阶极点留数":"Residue at a Simple Pole","高阶极点留数":"Residue at a Higher-Order Pole","洛朗级数":"Laurent Series","可去奇点":"Removable Singularity","极点判别":"Pole Classification","本性奇点":"Essential Singularity","辐角原理":"Argument Principle","分式线性变换":"Möbius Transformation","柯西主值积分":"Cauchy Principal Value","三角积分·留数":"Trigonometric Integral via Residues","无穷远点留数":"Residue at Infinity","复积分定义":"Definition of a Complex Integral","共轭调和函数":"Harmonic Conjugate","复数列收敛":"Convergence of Complex Sequences","解析函数幂级数":"Power Series of an Analytic Function","德摩根律":"De Morgan's Laws","蕴含等价":"Implication Equivalence","双重否定律":"Double Negation Law","分配律":"Distributive Law","吸收律":"Absorption Law","排中律":"Law of Excluded Middle","矛盾律":"Law of Non-Contradiction","等价定义":"Definition of Equivalence","逆否命题":"Contrapositive","量词否定":"Negation of Quantifiers","集合容斥·两集合":"Inclusion–Exclusion (Two Sets)","集合容斥·三集合":"Inclusion–Exclusion (Three Sets)","鸽巢原理":"Pigeonhole Principle","握手定理":"Handshaking Lemma","欧拉公式·平面图":"Euler's Formula (Planar Graphs)","树的边数":"Number of Edges in a Tree","完全图边数":"Number of Edges in a Complete Graph","欧拉路径条件":"Eulerian Path Condition","凯莱公式":"Cayley's Formula","欧拉函数":"Euler's Totient Function","费马小定理":"Fermat's Little Theorem","欧拉定理·数论":"Euler's Theorem (Number Theory)","贝祖定理":"Bézout's Identity","中国剩余定理":"Chinese Remainder Theorem","模逆元":"Modular Inverse","素数定理":"Prime Number Theorem","算术基本定理":"Fundamental Theorem of Arithmetic","最大公约数性质":"GCD Properties","卡特兰数":"Catalan Numbers","帕斯卡恒等式":"Pascal's Identity","范德蒙德恒等式":"Vandermonde's Identity","汉诺塔递推":"Tower of Hanoi Recurrence","主定理":"Master Theorem","图连通边数":"Edge Count for a Connected Graph","幂函数积分":"Integral of a Power Function","倒数积分":"Integral of 1/x","指数积分":"Integral of an Exponential","一般指数积分":"Integral of a General Exponential","正弦积分":"Integral of Sine","余弦积分":"Integral of Cosine","正切积分":"Integral of Tangent","余切积分":"Integral of Cotangent","正割积分":"Integral of Secant","余割积分":"Integral of Cosecant","正割平方积分":"Integral of sec²","余割平方积分":"Integral of csc²","正割乘正切积分":"Integral of sec·tan","反正切积分":"Integral of Arctangent","反正弦积分":"Integral of Arcsine","反正切·a形式":"Arctangent Integral (a-form)","反正弦·a形式":"Arcsine Integral (a-form)","差平方倒数积分":"Integral of 1/(a²−x²)","和平方倒数积分":"Integral of 1/(a²+x²)","根号平方和积分":"Integral of √(a²+x²)","根号平方差积分":"Integral of √(a²−x²)","对数积分":"Integral of Logarithm","x乘e积分":"Integral of x·eˣ","x乘正弦积分":"Integral of x·sin x","x乘余弦积分":"Integral of x·cos x","正弦平方积分":"Integral of sin²","余弦平方积分":"Integral of cos²","正切平方积分":"Integral of tan²","双曲正弦积分":"Integral of sinh","双曲余弦积分":"Integral of cosh","双曲正切积分":"Integral of tanh","指数正弦积分":"Integral of eˣ·sin x","指数余弦积分":"Integral of eˣ·cos x","x乘对数积分":"Integral of x·ln x","sin乘cos积分":"Integral of sin·cos","x²乘e积分":"Integral of x²·eˣ","反正切·x积分":"Integral of x·arctan x","反正弦·x积分":"Integral of x·arcsin x","反余弦·x积分":"Integral of x·arccos x","e的x²积分":"Integral of e^(x²)","分式x积分":"Rational Integral (x Form)","二次分母积分":"Integral with Quadratic Denominator","ln(1+x)积分":"Integral of ln(1+x)","sin²cos²积分":"Integral of sin²·cos²","根号圆积分":"Semicircle Integral","正割三次积分":"Integral of sec³","余割三次积分":"Integral of csc³","正弦乘对数积分":"Integral of sin·ln","x²乘正弦积分":"Integral of x²·sin x","x²乘余弦积分":"Integral of x²·cos x","分部积分公式":"Integration by Parts Formula","高斯积分":"Gaussian Integral","伽马函数定义":"Gamma Function Definition","贝塔函数定义":"Beta Function Definition","物质的量浓度":"Molar Concentration","质量分数换算浓度":"Mass Fraction to Concentration","气体分压定律":"Dalton's Law of Partial Pressures","阿伏伽德罗定律":"Avogadro's Law","气体摩尔体积":"Molar Volume of a Gas","亨利定律":"Henry's Law","沸点升高":"Boiling Point Elevation","凝固点降低":"Freezing Point Depression","渗透压":"Osmotic Pressure","质量摩尔浓度":"Molality","化学平衡常数":"Equilibrium Constant","水的离子积":"Ion Product of Water","pH定义":"Definition of pH","电离常数":"Ionization Constant","稀释定律":"Ostwald's Dilution Law","溶度积":"Solubility Product","缓冲溶液pH":"Buffer pH (Henderson–Hasselbalch)","水解常数":"Hydrolysis Constant","配位稳定常数":"Complex Formation Constant","能斯特方程":"Nernst Equation","电动势计算":"Cell EMF Calculation","法拉第电解定律":"Faraday's Laws of Electrolysis","阿伦尼乌斯方程":"Arrhenius Equation","化学反应速率":"Chemical Reaction Rate","盖斯定律":"Hess's Law","吉布斯自由能":"Gibbs Free Energy","电动势与平衡常数":"EMF and Equilibrium Constant","摩尔电导率":"Molar Conductivity","电离度":"Degree of Ionization","不饱和度":"Degree of Unsaturation","燃烧热":"Heat of Combustion","键能估算反应热":"Reaction Heat from Bond Energies","比旋光度":"Specific Rotation","旋光度":"Optical Rotation","分配系数":"Partition Coefficient","塔板数":"Number of Theoretical Plates","分离度":"Resolution","容量因子":"Capacity Factor","色谱保留值":"Chromatographic Retention","平均分子量":"Average Molecular Weight","聚合度":"Degree of Polymerization","皂化值":"Saponification Value","碘值":"Iodine Value","酸值":"Acid Value","分子式元素比":"Element Ratio from Molecular Formula","哈米特方程":"Hammett Equation","表观分子量":"Apparent Molecular Weight","朗伯比尔定律":"Beer–Lambert Law","透光率":"Transmittance","吸光度与透光率":"Absorbance and Transmittance","滴定分析计量点":"Titration Equivalence Point","分析化学基本单元":"Basic Unit in Analytical Chemistry","分配比":"Distribution Ratio","萃取率":"Extraction Efficiency","内标法":"Internal Standard Method","外标法":"External Standard Method","检测限":"Limit of Detection","定量限":"Limit of Quantification","精密度":"Precision","配位滴定条件":"Complexometric Titration Condition","沉淀滴定终点":"Precipitation Titration Endpoint","电位滴定能斯特":"Potentiometric Titration (Nernst)","色谱分离度判定":"Chromatographic Resolution Criterion","米氏方程":"Michaelis–Menten Equation","双倒数方程":"Lineweaver–Burk Equation","催化常数":"Catalytic Constant (kcat)","催化效率":"Catalytic Efficiency","酶比活力":"Specific Enzyme Activity","哈代温伯格定律":"Hardy–Weinberg Law","DNA碱基配对":"DNA Base Pairing","DNA双螺旋参数":"DNA Double Helix Parameters","生长速率常数":"Growth Rate Constant","倍增时间":"Doubling Time","平板菌落计数":"Plate Colony Count","血细胞计数板":"Hemocytometer Count","药物半衰期":"Drug Half-Life","清除率":"Clearance","表观分布容积":"Apparent Volume of Distribution","稳态血药浓度":"Steady-State Plasma Concentration","生物利用度":"Bioavailability","一级消除动力学":"First-Order Elimination Kinetics","静脉滴注稳态":"IV Infusion Steady State","表观分布容积·盐水":"Apparent Volume of Distribution (Saline)","群体遗传频率":"Population Genetic Frequency","密码子简并":"Codon Degeneracy","分压公式":"Voltage Divider","分流公式":"Current Divider","串联等效电阻":"Equivalent Series Resistance","并联等效电阻":"Equivalent Parallel Resistance","戴维南定理":"Thévenin's Theorem","诺顿定理":"Norton's Theorem","最大功率传输":"Maximum Power Transfer","RC时间常数":"RC Time Constant","RL时间常数":"RL Time Constant","电容充放电":"Capacitor Charging and Discharging","三相功率":"Three-Phase Power","变压器变比":"Transformer Turns Ratio","谐振品质因数":"Resonant Quality Factor","星三角电阻变换":"Star–Delta Transformation","耦合电感":"Coupled Inductors","交流阻抗":"AC Impedance","连续性方程":"Continuity Equation","泊肃叶定律":"Poiseuille's Law","雷诺数":"Reynolds Number","表面张力":"Surface Tension","毛细现象":"Capillary Action","斯托克斯阻力":"Stokes' Drag","流体静压力":"Hydrostatic Pressure","流量计算":"Flow Rate Calculation","水头损失":"Head Loss","马赫数":"Mach Number","浮力定律":"Archimedes' Buoyancy Principle","正应力":"Normal Stress","剪应力":"Shear Stress","应变定义":"Definition of Strain","泊松比":"Poisson's Ratio","剪切模量":"Shear Modulus","弯曲正应力":"Bending Normal Stress","抗弯截面模量":"Section Modulus","圆轴扭转":"Torsion of a Circular Shaft","压杆临界力":"Critical Buckling Load","梁挠度":"Beam Deflection","切应力双生":"Shear Stress Reciprocity","需求价格弹性":"Price Elasticity of Demand","供给价格弹性":"Price Elasticity of Supply","弹性中点法":"Midpoint Method for Elasticity","需求收入弹性":"Income Elasticity of Demand","消费者剩余":"Consumer Surplus","生产者剩余":"Producer Surplus","GDP支出法":"GDP Expenditure Approach","GDP收入法":"GDP Income Approach","CPI":"CPI","通货膨胀率":"Inflation Rate","实际利率":"Real Interest Rate","边际成本":"Marginal Cost","利润最大化条件":"Profit Maximization Condition","预算约束":"Budget Constraint","边际替代率":"Marginal Rate of Substitution","均衡条件·效用":"Equilibrium Condition (Utility)","乘数效应":"Multiplier Effect","失业率":"Unemployment Rate","菲利普斯曲线":"Phillips Curve","奥肯定律":"Okun's Law","货币数量方程":"Quantity Equation of Money","索洛增长":"Solow Growth Model","复利终值":"Compound Interest — Future Value","复利现值":"Compound Interest — Present Value","有效年利率":"Effective Annual Rate","连续复利":"Continuous Compounding","年金终值":"Annuity Future Value","年金现值":"Annuity Present Value","永续年金现值":"Perpetuity Present Value","增长永续年金":"Growing Perpetuity","净现值":"Net Present Value","内部收益率":"Internal Rate of Return","股利增长模型":"Dividend Growth Model","资本资产定价":"Capital Asset Pricing Model","夏普比率":"Sharpe Ratio","贝塔系数":"Beta Coefficient","资产组合方差":"Portfolio Variance","期权平价关系":"Put–Call Parity","布莱克斯科尔斯":"Black–Scholes Model","布莱克斯科尔斯d1":"Black–Scholes d₁","债券定价":"Bond Pricing","久期":"Duration","即期远期汇率":"Spot and Forward Exchange Rate","购买力平价":"Purchasing Power Parity","方差":"Variance","WACC":"WACC","溶液稀释公式":"Solution Dilution Formula","氯化钠等渗当量法":"Sodium Chloride Equivalent Method","冰点降低法等渗":"Freezing Point Depression Isotonicity","Noyes-Whitney溶出":"Noyes–Whitney Dissolution","D值灭菌":"D-Value (Sterilization)","F0值":"F0 Value","Z值":"Z Value","渗透压摩尔浓度":"Osmolarity","达峰时间":"Time to Peak","峰浓度":"Peak Concentration","负荷剂量":"Loading Dose","维持剂量":"Maintenance Dose","蓄积系数":"Accumulation Factor","平均稳态浓度":"Average Steady-State Concentration","波动度":"Fluctuation","肾清除率":"Renal Clearance","游离药物分数":"Free Drug Fraction","表观一级消除分数":"Apparent First-Order Elimination Fraction","清除率与半衰期":"Clearance and Half-Life","房室模型个数":"Number of Compartments","治疗指数":"Therapeutic Index","半数致死量计算":"Median Lethal Dose","剂量体重换算":"Dose–Body Weight Conversion","体表面积":"Body Surface Area","pD2值":"pD2 Value","pA2值":"pA2 Value","Emax药效模型":"Emax Efficacy Model","Hill方程":"Hill Equation","Schild方程":"Schild Equation","剂量反应对数":"Dose–Response Logarithm","联合用药敏感性":"Combination Drug Sensitivity","清除分数":"Fraction Cleared","肝清除率":"Hepatic Clearance","肝提取比":"Hepatic Extraction Ratio","给药间隔设计":"Dosing Interval Design","毒性蓄积指数":"Toxicity Accumulation Index","半数有效量":"Median Effective Dose","半数中毒量":"Median Toxic Dose","特异度":"Specificity","阳性预测值":"Positive Predictive Value","阴性预测值":"Negative Predictive Value","约登指数":"Youden Index","阳性似然比":"Positive Likelihood Ratio","比值比":"Odds Ratio","相对危险度":"Relative Risk","患病率":"Prevalence","发病率":"Incidence","卡方检验":"Chi-Square Test","t检验统计量":"t-Test Statistic","配对t检验":"Paired t-Test","两样本t检验":"Two-Sample t-Test","方差分析F":"ANOVA F-Statistic","95%可信区间":"95% Confidence Interval","BMI指数":"BMI","肌酐清除率C-G":"Creatinine Clearance (Cockcroft–Gault)","eGFR-EPI":"eGFR (CKD-EPI)","基础代谢率Mifflin":"Basal Metabolic Rate (Mifflin)","每日能量需求":"Daily Energy Requirement","静脉滴注速率":"IV Infusion Rate","输液时间":"Infusion Time","药物剂量体重":"Drug Dose by Body Weight","儿童剂量计算":"Pediatric Dose Calculation","按体表面积剂量":"Dose by Body Surface Area","钠泵？":"Sodium Pump","补钾量":"Potassium Replacement","血气碳酸氢根":"Blood Gas Bicarbonate","阴离子间隙":"Anion Gap","V = πr²h，S_侧 = 2πrh":"V = πr²h, S_lat = 2πrh","V = (1/3)πr²h，S_侧 = πrl":"V = (1/3)πr²h, S_lat = πrl","u_B = Δ_仪/√3":"u_B = Δ_instr/√3","ΣI_入 = ΣI_出":"ΣI_in = ΣI_out","R_x = E/I-R_内":"R_x = E/I − R_int","U_线 = √3×U_相":"U_line = √3×U_phase","T(t) = T_环+(T_0-T_环)×e^(-kt)":"T(t) = T_amb + (T_0 − T_amb)×e^(−kt)","y² = 2px 或 x² = 2py":"y² = 2px  or  x² = 2py","f″(x₀)<0 极大；f″(x₀)>0 极小":"f″(x₀) < 0 → local max;  f″(x₀) > 0 → local min","Ax=0 通解 = k₁ξ₁+k₂ξ₂+...":"Ax = 0, general solution = k₁ξ₁ + k₂ξ₂ + …","Ax=b 通解 = 特解 + 齐次通解":"Ax = b, general solution = particular + homogeneous general solution","A 满秩 ⟺ det(A)≠0 ⟺ 可逆":"A has full rank ⟺ det(A) ≠ 0 ⟺ A is invertible","A 正定 ⟺ 全部特征值 > 0":"A is positive definite ⟺ all eigenvalues > 0","二次型标准形正负惯性指数唯一":"the numbers of positive and negative terms in the standard form of a quadratic form are invariant","实对称矩阵特征值为实数，特征向量可正交":"a real symmetric matrix has real eigenvalues, and its eigenvectors can be orthogonalized","初等变换不改变矩阵的秩":"elementary transformations do not change the rank of a matrix","Ax=0 基础解系含 n-rank(A) 个解向量":"Ax = 0 has a fundamental system of n − rank(A) solution vectors","A 可逆 ⟺ |A|≠0 ⟺ rank(A)=n":"A is invertible ⟺ |A| ≠ 0 ⟺ rank(A) = n","两组向量互相线性表示 ⟺ rank 相等且同空间":"two vector sets are mutually linearly expressible ⟺ equal rank and same space","ΣXᵢ 近似正态 N(nμ, nσ²)":"ΣXᵢ is approximately normal  N(nμ, nσ²)","用样本矩估计总体矩：E(X)=x̄":"estimate population moments from sample moments:  E(X) = x̄","D(X+Y) = D(X)+D(Y)（独立）":"D(X + Y) = D(X) + D(Y)  (independent)","np≥5 且 n(1-p)≥5 时，X ~ N(np, np(1-p))":"when np ≥ 5 and n(1−p) ≥ 5,  X ~ N(np, np(1−p))","后验 ∝ 似然 × 先验":"posterior ∝ likelihood × prior","Σ1/nᵖ 收敛 ⟺ p>1":"Σ1/nᵖ converges ⟺ p > 1","Σ1/n 发散":"Σ1/n diverges","莱布尼茨：aₙ↓→0，则 Σ(-1)ⁿaₙ 收敛":"Leibniz: if aₙ ↓ 0, then Σ(−1)ⁿaₙ converges","lim|aₙ₊₁/aₙ| = ρ：ρ<1收敛，ρ>1发散":"lim|aₙ₊₁/aₙ| = ρ: converges if ρ < 1, diverges if ρ > 1","lim ⁿ√|aₙ| = ρ：ρ<1收敛，ρ>1发散":"lim ⁿ√|aₙ| = ρ: converges if ρ < 1, diverges if ρ > 1","Σaₙ 收敛 → lim aₙ = 0":"Σaₙ converges → lim aₙ = 0","0≤aₙ≤bₙ 且 Σbₙ 收敛 → Σaₙ 收敛":"if 0 ≤ aₙ ≤ bₙ and Σbₙ converges, then Σaₙ converges","方波 = (4/π)Σ sin((2k-1)x)/(2k-1)":"square wave = (4/π)Σ sin((2k−1)x)/(2k−1)","bₙ≤aₙ≤cₙ 且 lim bₙ=lim cₙ=L → lim aₙ=L":"if bₙ ≤ aₙ ≤ cₙ and lim bₙ = lim cₙ = L, then lim aₙ = L","单调且有界数列必收敛":"a monotone bounded sequence must converge","Σ|aₙ| 收敛 ⟹ Σaₙ 收敛":"if Σ|aₙ| converges, then Σaₙ converges","Σaₙ 收敛但 Σ|aₙ| 发散":"Σaₙ converges but Σ|aₙ| diverges","lim aₙ/bₙ = c>0，则同敛散":"if lim aₙ/bₙ = c > 0, the two series behave alike","f 单调减 → Σf(n) 与 ∫f(x)dx 同敛散":"if f is decreasing, Σf(n) and ∫f(x)dx behave alike","收敛域内 f(x)=Σ f⁽ⁿ⁾(a)(x-a)ⁿ/n!":"inside the interval of convergence,  f(x) = Σ f⁽ⁿ⁾(a)(x−a)ⁿ/n!","y′+P(x)y = Q(x)yⁿ，令 u=y^(1-n)":"y′ + P(x)y = Q(x)yⁿ,  let u = y^(1−n)","y″=f(x,y′)，令 p=y′":"y″ = f(x, y′),  let p = y′","y″=f(y,y′)，令 p=y′，y″=p·dp/dy":"y″ = f(y, y′),  let p = y′,  then y″ = p·dp/dy","y = y* + Y（特解+齐次通解）":"y = y* + Y  (particular + homogeneous general solution)","y = u₁y₁+u₂y₂ 代入求 u":"substitute y = u₁y₁ + u₂y₂ to solve for u","y″+py′+qy=0 通解 = C₁y₁+C₂y₂":"y″ + py′ + qy = 0,  general solution = C₁y₁ + C₂y₂","W = y₁y₂′-y₁′y₂ ≠ 0 线性无关":"W = y₁y₂′ − y₁′y₂ ≠ 0 → linearly independent","x²y″+pxy′+qy = f(x)，令 x=eᵗ":"x²y″ + pxy′ + qy = f(x),  let x = eᵗ","y = e^(λx) 代入得特征方程":"substitute y = e^(λx) to obtain the characteristic equation","y″+py′+qy=f(t) → 取L变换解代数方程":"y″ + py′ + qy = f(t) → take the Laplace transform and solve the algebraic equation","f 连续且满足Lipschitz → 初值问题有唯一解":"if f is continuous and Lipschitz, the initial value problem has a unique solution","y₁″+py₁′+qy₁=0 的解的和仍是解":"the sum of solutions of y₁″ + py₁′ + qy₁ = 0 is also a solution","y(0)=y₀，y′(0)=y₀′ 定任意常数":"y(0) = y₀,  y′(0) = y₀′ determine the arbitrary constants","f(x)=e^(λx)Pₘ(x) 时，y* = xᵏe^(λx)Qₘ(x)":"when f(x) = e^(λx)Pₘ(x),  y* = xᵏe^(λx)Qₘ(x)","已知 y₁，y₂ = y₁∫e^(-∫pdx)/y₁² dx":"given y₁,  y₂ = y₁∫e^(−∫p dx)/y₁² dx","θ = arctan(b/a)（主值 arg z）":"θ = arctan(b/a)  (principal value arg z)","f=u+iv 解析 ⟺ C-R方程成立且偏导连续":"f = u + iv is analytic ⟺ the C–R equations hold and the partials are continuous","f 在单连通域解析 → ∮f(z)dz = 0":"if f is analytic in a simply connected domain, ∮f(z)dz = 0","f(z) = Σ cₙ(z-a)ⁿ（含负幂项）":"f(z) = Σ cₙ(z−a)ⁿ  (including negative powers)","lim f(z) 存在有限 → 可去奇点":"if lim f(z) exists and is finite → removable singularity","lim(z→a)f(z) = ∞ → 极点":"if lim(z→a) f(z) = ∞ → pole","lim f(z) 不存在 → 本性奇点":"if lim f(z) does not exist → essential singularity","PV∫ = 留数方法计算实积分":"PV∫ — evaluate real integrals by the residue method","∫₀^{2π} R(cosθ,sinθ)dθ 用单位圆留数":"∫₀^{2π} R(cosθ, sinθ)dθ via residues on the unit circle","u、v 均为调和函数且互为共轭":"u and v are both harmonic and conjugate to each other","zₙ = xₙ+iyₙ 收敛 ⟺ xₙ、yₙ 都收敛":"zₙ = xₙ + iyₙ converges ⟺ both xₙ and yₙ converge","解析函数在其收敛圆内可展为泰勒级数":"an analytic function expands as a Taylor series inside its circle of convergence","p→q 与 ¬q→¬p 等价":"p→q is equivalent to ¬q→¬p","n+1 件物品放入 n 个抽屉，至少一抽屉有 ≥2 件":"placing n + 1 items into n drawers leaves at least one drawer with ≥ 2 items","n 个顶点的树有 n-1 条边":"a tree with n vertices has n − 1 edges","Kₙ 边数 = n(n-1)/2":"number of edges of Kₙ = n(n−1)/2","连通图有欧拉回路 ⟺ 所有顶点度数为偶数":"a connected graph has an Eulerian circuit ⟺ every vertex has even degree","n 个顶点的生成树数目 = n^(n-2)":"number of spanning trees on n vertices = n^(n−2)","p 为素数且 p∤a → a^(p-1) ≡ 1 (mod p)":"if p is prime and p ∤ a, then a^(p−1) ≡ 1 (mod p)","gcd(a,b) = ax+by 有整数解":"gcd(a, b) = ax + by has integer solutions","x≡aᵢ(mod mᵢ) 且 mᵢ 两两互素 → 有唯一解 mod M":"if x ≡ aᵢ (mod mᵢ) with the mᵢ pairwise coprime → a unique solution mod M","n = p₁^(e₁)p₂^(e₂)... 唯一分解":"n = p₁^(e₁)p₂^(e₂)… unique factorization","T(n)=aT(n/b)+f(n) 的渐近阶":"asymptotic order of T(n) = aT(n/b) + f(n)","连通图至少 n-1 条边":"a connected graph has at least n − 1 edges","同温同压下，V₁/V₂ = n₁/n₂":"at the same temperature and pressure,  V₁/V₂ = n₁/n₂","Vₘ = V/n（标况 22.4 L/mol）":"Vₘ = V/n  (22.4 L/mol at STP)","b = n/m(溶剂kg)":"b = n/m  (kg of solvent)","Q = Π(cᵢ)^νᵢ（非平衡态）":"Q = Π(cᵢ)^νᵢ  (non-equilibrium)","E⁰ = E⁰(正极) - E⁰(负极)":"E⁰ = E⁰(cathode) − E⁰(anode)","ΔH 只与始末态有关，与路径无关":"ΔH depends only on the initial and final states, not on the path","α = 已电离/初始浓度":"α = ionized / initial concentration","Ω = (2C+2-H)/2（卤素当H，O不计）":"Ω = (2C + 2 − H)/2  (halogens count as H; O ignored)","ΔH = ΣE(断键) - ΣE(成键)":"ΔH = ΣE(bonds broken) − ΣE(bonds formed)","K = c(有机相)/c(水相)":"K = c(organic phase)/c(aqueous phase)","R_f = 溶质移动距离/溶剂前沿距离":"R_f = distance moved by solute / distance moved by solvent front","M̄ = ΣxᵢMᵢ（摩尔分数加权）":"M̄ = ΣxᵢMᵢ  (weighted by mole fraction)","DP = M(高聚物)/M(重复单元)":"DP = M(polymer)/M(repeat unit)","IV = 卤化的碘质量(g)/100g油脂":"IV = mass of halogenated iodine (g) per 100 g of fat","M = W·RT/(Π·V)（渗透压法）":"M = W·RT/(Π·V)  (osmotic pressure method)","c₁V₁ = c₂V₂（1:1计量）":"c₁V₁ = c₂V₂  (1:1 stoichiometry)","D = c(有机相)/c(水相)（平衡时）":"D = c(organic)/c(aqueous)  (at equilibrium)","E = D/(D+V水/V有)×100%":"E = D/(D + V_water/V_org)×100%","cᵢ = Aᵢ/k（标准曲线）":"cᵢ = Aᵢ/k  (calibration curve)","lg(K′·c) ≥ 6（准确滴定）":"lg(K′·c) ≥ 6  (accurate titration)","R_s ≥ 1.5 完全分离":"R_s ≥ 1.5 → complete separation","kcat/Km（衡量酶特异性）":"kcat/Km  (measures enzyme specificity)","比活力 = 酶活力单位/mg蛋白":"specific activity = enzyme units / mg protein","A=T，G=C（查加夫规则）":"A = T,  G = C  (Chargaff's rule)","每圈 10 bp，螺距 3.4 nm":"10 bp per turn,  pitch 3.4 nm","CFU/mL = 菌落数×稀释倍数/涂布体积":"CFU/mL = colonies × dilution factor / plating volume","细胞数/mL = 计数×10⁴×稀释倍数":"cells/mL = count × 10⁴ × dilution factor","CL = 剂量/AUC":"CL = dose/AUC","F = AUC(口服)/AUC(静脉)":"F = AUC(oral)/AUC(IV)","Css = k₀/(CL)（k₀为滴注速率）":"Css = k₀/CL  (k₀ is the infusion rate)","Vd = D/(C₀)（即刻浓度外推）":"Vd = D/C₀  (extrapolated from the initial concentration)","64 密码子，61 编码，3 终止":"64 codons: 61 coding, 3 stop","Uᵢ = U·Rᵢ/R总（串联）":"Uᵢ = U·Rᵢ/R_total  (series)","Iᵢ = I·Gᵢ/G总 = I·R总/Rᵢ（并联）":"Iᵢ = I·Gᵢ/G_total = I·R_total/Rᵢ  (parallel)","任意有源二端网络 → 电压源Uoc+串联R₀":"any active two-terminal network → voltage source Uoc + series R₀","任意有源二端网络 → 电流源Isc+并联R₀":"any active two-terminal network → current source Isc + parallel R₀","R_L = R₀ 时 P_max = Uoc²/(4R₀)":"when R_L = R₀,  P_max = Uoc²/(4R₀)","τ = RC（充电/放电时间常数）":"τ = RC  (charge/discharge time constant)","A₁v₁ = A₂v₂（不可压缩流体）":"A₁v₁ = A₂v₂  (incompressible fluid)","p + ρgh + ρv²/2 = 常数":"p + ρgh + ρv²/2 = constant","F = 6πηrv（小球低速）":"F = 6πηrv  (small sphere at low speed)","F_b = ρgV排":"F_b = ρgV_disp","ν = -ε侧/ε纵":"ν = −ε_lat/ε_axial","F_cr = π²EI/(μL)²（欧拉公式）":"F_cr = π²EI/(μL)²  (Euler's formula)","简支梁中点：δ = FL³/(48EI)":"simply supported beam, midpoint:  δ = FL³/(48EI)","τ = τ′（互等定理）":"τ = τ′  (reciprocity theorem)","GDP = 工资+利息+租金+利润+间接税+折旧":"GDP = wages + interest + rent + profit + indirect taxes + depreciation","CPI = 本期篮子支出/基期篮子支出×100":"CPI = current basket cost / base-period basket cost × 100","r = i - π（费雪方程近似）":"r = i − π  (Fisher equation approximation)","u = 失业人数/劳动力×100%":"u = unemployed / labour force × 100%","a·sinθ = kλ（暗纹）":"a·sinθ = kλ  (dark fringes)","L = Iω = mvr（质点）":"L = Iω = mvr  (point mass)","f_拍 = |f₁-f₂|":"f_beat = |f₁ − f₂|","C_osm = n·c（n为每摩尔解离粒子数）":"C_osm = n·c  (n = particles per mole on dissociation)","D₂ = D₁·(W₂/W₁)^(2/3)（体表面积法）":"D₂ = D₁·(W₂/W₁)^(2/3)  (body surface area method)","logC-t 曲线：双段为二室":"logC–t curve: two segments indicate a two-compartment model","pA₂ = -lg(K_B)（拮抗参数）":"pA₂ = −lg(K_B)  (antagonist parameter)","对数剂量-反应曲线呈S形":"the log dose–response curve is S-shaped","CLh = Q·E（E为提取比）":"CLh = Q·E  (E is the extraction ratio)","蓄积系数 K = LD50(多次)/LD50(单次)":"accumulation factor K = LD50(repeated)/LD50(single)","ED50 = 50%动物有效的剂量":"ED50 = dose effective in 50% of animals","TD50 = 50%动物中毒的剂量":"TD50 = dose toxic to 50% of animals","P = 患病人数/检查人数":"P = cases / number examined","I = 新发病例/暴露人年":"I = new cases / person-years at risk","F = MS组间/MS组内":"F = MS_between/MS_within","BMI = 体重(kg)/身高²(m)":"BMI = weight(kg) / height²(m)","CLcr = (140-年龄)×体重/(72×Scr)（男）":"CLcr = (140 − age)×weight/(72×Scr)  (male)","eGFR = 141×min(Scr/κ,1)^α×max(Scr/κ,1)^(-1.209)×0.993^年龄":"eGFR = 141×min(Scr/κ,1)^α×max(Scr/κ,1)^(−1.209)×0.993^age","BMR男 = 10W+6.25H-5A+5；女 = 10W+6.25H-5A-161":"BMR male = 10W + 6.25H − 5A + 5;  female = 10W + 6.25H − 5A − 161","TDEE = BMR×活动系数(1.2~1.9)":"TDEE = BMR × activity factor (1.2–1.9)","滴速(gtt/min) = 总量(mL)×滴系数/时间(h)×60":"drip rate (gtt/min) = volume (mL) × drop factor / time (h) × 60","t = V×滴系数/(滴速×60)":"t = V × drop factor / (drip rate × 60)","D = D/kg×体重":"D = D/kg × body weight","D = 成人剂量×体重/70":"D = adult dose × weight/70","D = 剂量/m²×BSA":"D = dose/m² × BSA","低钠纠正：ΔNa = (目标-当前)×0.6×W":"sodium correction:  ΔNa = (target − current)×0.6×W","补钾(mmol) = (目标-当前)×0.3×W":"potassium replacement (mmol) = (target − current)×0.3×W","uB = 仪器允差/√3（均匀分布）":"uB = instrument tolerance/√3  (uniform distribution)","uc = √(uA²+uB²)（不相关）":"uc = √(uA² + uB²)  (uncorrelated)","精密度 = 1/RSD":"precision = 1/RSD","S_侧":"S_lat","Δ_仪":"Δ_instr","I_入":"I_in","I_出":"I_out","R_内":"R_int","U_线":"U_line","U_相":"U_phase","T_环":"T_amb","公式计算器":"Formula Calculator","物理 · 数学 · 离线":"Physics · Math · Offline","搜名称，或输入公式如 e=mc2":"Search by name, or type a formula like e=mc2","全部":"All","计算":"Calc","最近":"Recent","收藏":"Starred","美化":"Beautify","结果有效数字":"Significant digits","2 位":"2 digits","3 位":"3 digits","4 位":"4 digits","＋ 自定义公式":"+ Custom formula","全部公式":"All Formulas","深色":"Dark","纸张":"Paper","蓝图":"Blueprint","切换主题":"Switch theme","快速计算":"Quick Calc","输入任意表达式，实时求值；支持有效数字设置（侧栏）":"Type any expression for instant evaluation. Significant digits are set in the sidebar.","如 sqrt(9^2+12^2) 或 2*pi*5":"e.g. sqrt(9^2+12^2) or 2*pi*5","示例：":"Examples:","勾股":"Hypotenuse","复利":"Compound interest","结果":"Result","输入表达式后自动计算":"Enter an expression to calculate","支持":"Supports","四则与乘方，函数":"arithmetic and powers, functions","，常量":", constants","，以及分号多语句如":", and multi-statement input such as","公式美化器":"Formula Beautifier","输入原始公式，自动识别角标、把 / 转为水平分数线，生成标准格式供复制进文档":"Paste a raw formula — subscripts are detected automatically and / becomes a horizontal fraction bar, producing a standard format ready to paste into documents.","粘贴公式，如：RV= UV×R/(US−UV)":"Paste a formula, e.g. RV= UV×R/(US−UV)","智能角标识别（RV → R_V、Umax → U_max、x1 → x_1）":"Smart subscript detection (RV → R_V, Umax → U_max, x1 → x_1)","峰值与有效值":"Peak and RMS","标准格式预览（Word 直粘成公式；WPS 用下方\"标准文本\"或 LaTeX）":"Standard format preview (paste directly into Word; for WPS use \"Standard text\" or LaTeX below)","输入公式后自动生成标准格式":"Standard format will appear here","标准文本（Word/WPS：公式模式中粘贴即公式）":"Standard text (Word/WPS: paste in equation mode)","复制":"Copy","LaTeX":"LaTeX","Word 公式对象（Word 直粘；WPS 用左侧两条）":"Word equation object (paste into Word; WPS users please use the two options above)","保存为自定义公式":"Save as custom formula","关闭智能识别时，手动下划线角标（R_V）原样保留":"With smart detection off, manual subscript underscores (R_V) are preserved as written","添加自定义公式":"Add Custom Formula","编辑自定义公式":"Edit Custom Formula","公式名称":"Formula name","如：我的拟合公式":"e.g. My fitted formula","分类":"Category","自定义":"Custom","公式（标准写法，如 E = mc²）":"Formula (standard form, e.g. E = mc²)","LaTeX（可留空）":"LaTeX (optional)","保存":"Save","保存修改":"Save changes","取消":"Cancel","回到顶部":"Back to top","逐变量代入计算（聚焦变量框时上方公式对应符号高亮）":"Substitute variables step by step — the matching symbol in the formula highlights when a field is focused","待填写":"Pending","复制结果":"Copy result","重置":"Reset","编辑":"Edit","删除":"Delete","确认删除?":"Confirm delete?","纯文本":"Plain text","UnicodeMath":"UnicodeMath","Word公式":"Word formula","公式+注释":"Formula + notes","✓ 已复制":"✓ Copied","已复制":"Copied","计算错误":"Calculation error","没有找到匹配的公式。":"No matching formulas found.","试试其他关键词，或直接用公式写法搜索（如 e=mc2、U=IR）。":"Try another keyword, or search by the formula itself (e.g. e=mc2, U=IR).","收藏的公式":"Starred Formulas","最近查看":"Recently Viewed","搜索结果":"Search Results","已复制：标准纯文本（Word Alt+= 可转公式）":"Copied: plain text (Alt+= in Word converts it to an equation)","已复制：UnicodeMath（Word Alt+= 粘贴即公式）":"Copied: UnicodeMath (Alt+= in Word, then paste)","已复制：LaTeX":"Copied: LaTeX","已复制：Word 公式（Word 直粘；WPS 请用标准文本或 LaTeX）":"Copied: Word equation (paste into Word; WPS users please use plain text or LaTeX)","已复制：公式 + 符号注释":"Copied: formula + symbol notes","已复制：计算结果":"Copied: result","已复制：标准文本（Word/WPS 公式模式中粘贴即公式）":"Copied: standard text (paste in Word/WPS equation mode)","请先填写所有变量":"Please fill in all variables first","请先输入公式":"Please enter a formula first","名称与公式不能为空":"Name and formula cannot be empty","已添加自定义公式":"Custom formula added","已保存修改":"Changes saved","无法计算，请检查表达式":"Cannot evaluate — please check the expression","公式无法生成，请检查输入":"Could not generate the formula — please check the input","无法解析，请检查公式写法（如括号是否成对）":"Could not parse — please check the formula (e.g. unbalanced parentheses)","已完成":"Done","语言":"Language","中":"中","EN":"EN","中文":"中文","English":"English","批量导入公式":"Batch Import Formulas","批量导入":"Batch import","⇪ 批量导入":"⇪ Batch import","一元二次方程求根公式 | x = (-b ± √(b²-4ac))/(2a)":"Quadratic formula | x = (-b ± √(b²-4ac))/(2a)","只填名称和公式即可，分类用下方下拉框统一指定；也支持 Excel / CSV 表格、带序号的行。":"Only name and formula are required — the category below applies to the whole batch. Excel / CSV tables and numbered lines are also supported.","粘贴文本":"Paste text","上传文件":"Upload file","把每行一条公式粘贴到这里，格式：名称 | 公式（分类可省略）":"Paste one formula per line, format: Name | Formula (category optional)","选择文件":"Choose file","支持 .txt / .md / .csv / .json / .docx / .xlsx":"Supports .txt / .md / .csv / .json / .docx / .xlsx","本批公式归到哪一类":"Category for this batch","实时预览":"Live preview","已识别":"Detected","条":"items","行有误，已跳过":"invalid lines skipped","第":"Line","名称":"Name","公式":"Formula","待导入":"Ready to import","没有可导入的公式":"No importable formulas","确认导入":"Import","下载模板":"Download template","导入成功":"Imported successfully","条公式":"formulas","全部重复，已跳过":"All duplicates — skipped","重复处理":"Duplicates","跳过重复":"Skip duplicates","覆盖同名":"Overwrite same name","全部保留":"Keep all","示例格式":"Example format","一行一条，用 | 分隔字段":"One per line, fields separated by |","只填名称和公式即可，分类用上方下拉框统一指定":"Only name and formula are required — the category above applies to the whole batch","也支持 Excel / CSV 表格和带序号的行":"Excel / CSV tables and numbered lines are also supported","解析中":"Parsing","无法读取该文件":"Could not read this file","文件为空":"File is empty","共 {n} 条":"{n} items","待填写：{x}":"Pending: {x}","已删除「{x}」":"Deleted “{x}”","已识别 {n} 条":"{n} detected","，{m} 行无法识别":", {m} unrecognized","已导入 {n} 条公式":"Imported {n} formulas","，跳过 {n} 条重复":", {n} duplicates skipped","，覆盖 {n} 条同名":", {n} overwritten","模板已下载":"Template downloaded","名称 / 公式 为空":"Name / formula is empty","示例名称 | 示例公式":"Example name | Example formula","行格式无法识别":"Unrecognized line format"};
+
+let LANG = 'zh';
+
+/* 翻译：中文 -> 英文（英文模式且存在词条时） */
+function t(s){
+  if (LANG !== 'en') return s;
+  if (s === null || s === undefined) return s;
+  const v = I18N_EN[s];
+  return v !== undefined ? v : s;
+}
+
+/* 动态文案：把 {x} 之类的占位符替换掉 */
+function tf(s, map){
+  let out = t(s);
+  for (const k in map) out = out.split('{' + k + '}').join(map[k]);
+  return out;
+}
+
+/* 遍历静态界面文案（只在启动与切换语言时调用，避免频繁 DOM 遍历） */
+const _i18nOrigText = new WeakMap();
+function applyI18n(root){
+  root = root || document.body;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  const nodes = [];
+  let n;
+  while ((n = walker.nextNode())) nodes.push(n);
+
+  for (const node of nodes){
+    if (!_i18nOrigText.has(node)) _i18nOrigText.set(node, node.nodeValue);
+    const raw = _i18nOrigText.get(node);
+    const key = raw.trim();
+    if (!key) continue;
+    node.nodeValue = (LANG === 'en' && I18N_EN[key] !== undefined)
+      ? raw.replace(key, I18N_EN[key]) : raw;
+  }
+
+  const attrEls = [root];
+  root.querySelectorAll('[placeholder],[title],[aria-label]').forEach(el => attrEls.push(el));
+  attrEls.forEach(el => {
+    if (!el.hasAttribute) return;
+    el._i18n = el._i18n || {};
+    for (const attr of ['placeholder', 'title', 'aria-label']){
+      if (!el.hasAttribute(attr)) continue;
+      if (!(attr in el._i18n)) el._i18n[attr] = el.getAttribute(attr);
+      const raw = el._i18n[attr];
+      const key = raw.trim();
+      if (!key) continue;
+      el.setAttribute(attr, (LANG === 'en' && I18N_EN[key] !== undefined)
+        ? raw.replace(key, I18N_EN[key]) : raw);
+    }
+  });
+}
+
+/* 需要翻译的静态区域（不含动态渲染的 #list，避免覆盖已翻译内容） */
+function applyI18nStatic(){
+  ['.side', '.topbar', '#calc', '#beauty', '#modal', '#importModal', '#backTop', '.toast'].forEach(function(sel){
+    const el = document.querySelector(sel);
+    if (el) applyI18n(el);
+  });
+}
+
+/* 切换语言：重绘动态内容 + 重刷静态文案 */
+function setLang(lang){
+  LANG = (lang === 'en') ? 'en' : 'zh';
+  try { localStorage.setItem('fl_lang', LANG); } catch (e) {}
+  document.documentElement.setAttribute('lang', LANG === 'en' ? 'en' : 'zh-CN');
+  document.querySelectorAll('#langSwitch button').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === LANG));
+  if (typeof refreshAll === 'function') refreshAll();
+  if (typeof renderCats === 'function') renderCats();
+  if (typeof renderList === 'function') renderList();
+  if (typeof calcUpdate === 'function') calcUpdate();
+  if (typeof beautyUpdate === 'function') beautyUpdate();
+  applyI18nStatic();
+}
+
+/* 启动时初始化语言 */
+function initLang(){
+  let saved = 'zh';
+  try { saved = localStorage.getItem('fl_lang') || 'zh'; } catch (e) {}
+  LANG = (saved === 'en') ? 'en' : 'zh';
+  document.documentElement.setAttribute('lang', LANG === 'en' ? 'en' : 'zh-CN');
+  document.querySelectorAll('#langSwitch button').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === LANG));
+  applyI18nStatic();
+}
+
+/* =====================================================================
    状态
    ===================================================================== */
 let favSet=new Set(JSON.parse(localStorage.getItem('fl_fav')||'[]'));
@@ -1208,8 +1384,8 @@ const backTop=document.getElementById('backTop');
 function renderCats(){
   const counts={};
   all.forEach(f=>{counts[f.cat]=(counts[f.cat]||0)+1;});
-  catEl.innerHTML='<button class="cat'+(catSel==='全部'?' active':'')+'" data-c="全部">全部公式<span class="n">'+all.length+'</span></button>'
-    +CATS.map(c=>'<button class="cat'+(catSel===c?' active':'')+'" data-c="'+esc(c)+'">'+esc(c)+'<span class="n">'+(counts[c]||0)+'</span></button>').join('');
+  catEl.innerHTML='<button class="cat'+(catSel==='全部'?' active':'')+'" data-c="全部">'+esc(t('全部公式'))+'<span class="n">'+all.length+'</span></button>'
+    +CATS.map(c=>'<button class="cat'+(catSel===c?' active':'')+'" data-c="'+esc(c)+'">'+esc(t(c))+'<span class="n">'+(counts[c]||0)+'</span></button>').join('');
 }
 function filtered(){
   let arr=[];
@@ -1225,40 +1401,40 @@ function cardHTML(f,idx){
   const fav=favSet.has(f.name)?' on':'';
   const delay=Math.min(idx*35,420);
   const cal=(f.params&&f.params.length)
-    ?'<div class="calc"><div class="calc-t">逐变量代入计算（聚焦变量框时上方公式对应符号高亮）</div>'
+    ?'<div class="calc"><div class="calc-t">'+esc(t('逐变量代入计算（聚焦变量框时上方公式对应符号高亮）'))+'</div>'
       +'<div class="cvars">'+f.params.map(p=>
-        '<label class="var"><span class="vn">'+esc(p.k)+'</span><i>'+esc(p.l||'')+'</i>'
+        '<label class="var"><span class="vn">'+esc(p.k)+'</span><i>'+esc(t(p.l||''))+'</i>'
         +'<input data-v="'+esc(p.k)+'" type="text" value="'+esc(p.d!=null?p.d:'')+'" placeholder="–">'
         +'<b>'+esc(p.u||'')+'</b></label>').join('')
       +'</div>'
-      +'<div class="cres"><span class="clabel">结果</span><span class="cval pending" data-res>待填写：'+esc(f.params.map(p=>p.k).join('、'))+'</span>'
-      +'<button class="btn" data-act="copy" data-fmt="res">复制结果</button></div>'
-      +'<button class="reset" data-act="reset">重置</button></div>'
+      +'<div class="cres"><span class="clabel">'+esc(t('结果'))+'</span><span class="cval pending" data-res>'+esc(tf('待填写：{x}',{x:f.params.map(p=>p.k).join('、')}))+'</span>'
+      +'<button class="btn" data-act="copy" data-fmt="res">'+esc(t('复制结果'))+'</button></div>'
+      +'<button class="reset" data-act="reset">'+esc(t('重置'))+'</button></div>'
     :'';
   const tool=isC
-    ?'<button class="edit" data-act="edit" title="编辑">✎ 编辑</button><button class="del" data-act="del" title="删除">🗑 删除</button>'
+    ?'<button class="edit" data-act="edit" title="'+esc(t('编辑'))+'">✎ '+esc(t('编辑'))+'</button><button class="del" data-act="del" title="'+esc(t('删除'))+'">🗑 '+esc(t('删除'))+'</button>'
     :'';
   return '<article class="card" data-name="'+esc(f.name)+'" data-cat="'+esc(f.cat)+'"'+(isC?' data-id="'+esc(f._id)+'"':'')+' style="animation-delay:'+delay+'ms">'
-    +'<div class="chead"><h2>'+highlightName(f.name)+'</h2><span class="cat">'+esc(f.cat)+'</span>'
+    +'<div class="chead"><h2>'+highlightName(t(f.name))+'</h2><span class="cat">'+esc(t(f.cat))+'</span>'
     +tool
-    +'<button class="fav'+fav+'" data-act="fav" title="收藏">☆</button></div>'
-    +'<div class="formula">'+plainToHtml(f.plain)+'</div>'
+    +'<button class="fav'+fav+'" data-act="fav" title="'+esc(t('收藏'))+'">☆</button></div>'
+    +'<div class="formula">'+plainToHtml(t(f.plain))+'</div>'
     +'<div class="btns">'
-    +'<button class="btn primary" data-act="copy" data-fmt="plain">纯文本</button>'
+    +'<button class="btn primary" data-act="copy" data-fmt="plain">'+esc(t('纯文本'))+'</button>'
     +'<button class="btn" data-act="copy" data-fmt="umath">UnicodeMath</button>'
     +'<button class="btn" data-act="copy" data-fmt="latex">LaTeX</button>'
-    +'<button class="btn" data-act="copy" data-fmt="mathml">Word公式</button>'
-    +'<button class="btn" data-act="copy" data-fmt="note">公式+注释</button>'
+    +'<button class="btn" data-act="copy" data-fmt="mathml">'+esc(t('Word公式'))+'</button>'
+    +'<button class="btn" data-act="copy" data-fmt="note">'+esc(t('公式+注释'))+'</button>'
     +'</div>'+cal+'</article>';
 }
 function titleFor(){
-  if(view==='beauty')return '公式美化器';
-  if(view==='calc')return '快速计算';
-  if(view==='fav')return '收藏的公式';
-  if(view==='recent')return '最近查看';
-  if(catSel!=='全部')return catSel;
-  if(kw)return '搜索结果';
-  return '全部公式';
+  if(view==='beauty')return t('公式美化器');
+  if(view==='calc')return t('快速计算');
+  if(view==='fav')return t('收藏的公式');
+  if(view==='recent')return t('最近查看');
+  if(catSel!=='全部')return t(catSel);
+  if(kw)return t('搜索结果');
+  return t('全部公式');
 }
 function renderList(){
   const isBeauty=view==='beauty', isCalc=view==='calc';
@@ -1269,10 +1445,10 @@ function renderList(){
   if(isBeauty){ resultCountEl.textContent=''; return; }
   if(isCalc){ resultCountEl.textContent=''; calcUpdate(); return; }
   const arr=filtered();
-  resultCountEl.textContent='共 '+arr.length+' 条';
+  resultCountEl.textContent=tf('共 {n} 条',{n:arr.length});
   listEl.innerHTML=arr.length
     ?arr.map((f,i)=>cardHTML(f,i)).join('')
-    :'<div class="empty"><span class="eico">🔍</span>没有找到匹配的公式。<br>试试其他关键词，或直接用公式写法搜索（如 e=mc2、U=IR）。</div>';
+    :'<div class="empty"><span class="eico">🔍</span>'+esc(t('没有找到匹配的公式。'))+'<br>'+esc(t('试试其他关键词，或直接用公式写法搜索（如 e=mc2、U=IR）。'))+'</div>';
   arr.forEach((f,idx)=>{
     if(f.params&&f.params.length){
       const card=listEl.children[idx];
@@ -1296,12 +1472,12 @@ function computeCard(card,f,force){
     vars[p.k]=v;
   });
   const res=card.querySelector('[data-res]');
-  if(miss.length){res.textContent='待填写：'+miss.join('、');res.className='cval pending';return;}
+  if(miss.length){res.textContent=tf('待填写：{x}',{x:miss.join('、')});res.className='cval pending';return;}
   const val=evalExpr(f.compute,vars);
   const sig=parseInt(document.getElementById('sig').value,10)||3;
   const txt=fmtSig(val,sig);
-  const left=(f.plain.split('=')[0]||'').trim();
-  res.textContent=txt!==null?(left+' = '+txt+(f.ru?' '+f.ru:'')):'计算错误';
+  const left=(t(f.plain).split('=')[0]||'').trim();
+  res.textContent=txt!==null?(left+' = '+txt+(f.ru?' '+t(f.ru):'')):t('计算错误');
   res.className='cval';
 }
 
@@ -1312,8 +1488,46 @@ function flashCopied(btn){
   if(!btn)return;
   const orig=btn.innerHTML;
   btn.classList.add('copied');
-  btn.textContent='✓ 已复制';
+  btn.textContent=t('✓ 已复制');
   setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=orig;},1200);
+}
+/* 覆盖原版「公式+注释」的生成，使其跟随语言 */
+function noteText(f){
+  if(!f.symbols||!f.symbols.length)return f.plain;
+  const en=(typeof LANG!=='undefined'&&LANG==='en');
+  const head=en?'where ':'式中：';
+  const dash=en?' — ':'——';
+  const sep=en?'; ':'；';
+  const wrap=u=>u?(en?' ('+u+')':'（'+u+'）'):'';
+  return f.plain+'\n'+head+f.symbols.map(s=>t(s.s)+dash+t(s.m)+wrap(s.u)).join(sep);
+}
+
+/* 覆盖美化器渲染：原版在公式非法时会渲染出 "undefined"，这里补上校验并跟随语言 */
+function beautyUpdate(){
+  const raw=bIn.value;
+  const prev=document.getElementById('bPrev');
+  const pEl=document.getElementById('bPlain');
+  if(!raw.trim()){
+    prev.innerHTML='<span class="bmut">'+esc(t('输入公式后自动生成标准格式'))+'</span>';
+    pEl.textContent='';
+    document.getElementById('bLatex').textContent='';
+    document.getElementById('bMM').textContent='';
+    return;
+  }
+  let plain=normBeauty(raw);
+  if(bSmart.checked)plain=smartSub(plain);
+  pEl.textContent=plain;
+  document.getElementById('bLatex').textContent=plainToLatex(plain);
+  try{
+    const mml=buildMathML(plain);
+    if(typeof mml!=='string'||mml.indexOf('undefined')>=0)throw new Error('bad formula');
+    const omml=buildOMML(plain);
+    document.getElementById('bMM').textContent=(typeof omml==='string'&&omml.indexOf('undefined')<0)?omml:'';
+    prev.innerHTML=mml;
+  }catch(e){
+    prev.innerHTML='<span style="color:#E8603C">'+esc(t('无法解析，请检查公式写法（如括号是否成对）'))+'</span>';
+    document.getElementById('bMM').textContent='';
+  }
 }
 
 /* =====================================================================
@@ -1370,18 +1584,18 @@ listEl.addEventListener('click',e=>{
   if(a==='del'){handleDelete(card,f,act);return;}
   if(a==='copy'){
     const fmt=act.dataset.fmt;
-    if(fmt==='plain')copyText(f.plain,'已复制：标准纯文本（Word Alt+= 可转公式）');
-    else if(fmt==='umath')copyText(f.plain,'已复制：UnicodeMath（Word Alt+= 粘贴即公式）');
-    else if(fmt==='latex')copyText(f.latex||f.plain,'已复制：LaTeX');
+    if(fmt==='plain')copyText(f.plain,t('已复制：标准纯文本（Word Alt+= 可转公式）'));
+    else if(fmt==='umath')copyText(f.plain,t('已复制：UnicodeMath（Word Alt+= 粘贴即公式）'));
+    else if(fmt==='latex')copyText(f.latex||f.plain,t('已复制：LaTeX'));
     else if(fmt==='mathml'){
       const mml=buildOMML(f.plain);
-      copyRich('<html xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"><body><p><m:oMathPara>'+mml+'</m:oMathPara></p></body></html>',f.plain,'已复制：Word 公式（Word 直粘；WPS 请用标准文本或 LaTeX）');
+      copyRich('<html xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"><body><p><m:oMathPara>'+mml+'</m:oMathPara></p></body></html>',f.plain,t('已复制：Word 公式（Word 直粘；WPS 请用标准文本或 LaTeX）'));
     }
-    else if(fmt==='note')copyText(noteText(f),'已复制：公式 + 符号注释');
+    else if(fmt==='note')copyText(noteText(f),t('已复制：公式 + 符号注释'));
     else if(fmt==='res'){
-      const t=card.querySelector('[data-res]');
-      if(t&&!t.classList.contains('pending'))copyText(t.textContent,'已复制：计算结果');
-      else{toast('请先填写所有变量');return;}
+      const rel=card.querySelector('[data-res]');
+      if(rel&&!rel.classList.contains('pending'))copyText(rel.textContent,t('已复制：计算结果'));
+      else{toast(t('请先填写所有变量'));return;}
     }
     flashCopied(act);
   }
@@ -1426,12 +1640,13 @@ const modal=document.getElementById('modal');
 const mTitle=document.getElementById('mTitle');
 function fillCatOptions(){
   const sel=document.getElementById('cCat');
-  sel.innerHTML=CATS.map(c=>'<option>'+c+'</option>').join('')+'<option>自定义</option>';
+  sel.innerHTML=CATS.map(c=>'<option value="'+esc(c)+'">'+esc(t(c))+'</option>').join('')
+    +'<option value="自定义">'+esc(t('自定义'))+'</option>';
 }
 function openAddModal(){
   editingId=null;
-  mTitle.textContent='添加自定义公式';
-  document.getElementById('cOk').textContent='保存';
+  mTitle.textContent=t('添加自定义公式');
+  document.getElementById('cOk').textContent=t('保存');
   document.getElementById('cName').value='';
   document.getElementById('cPlain').value='';
   document.getElementById('cLatex').value='';
@@ -1441,9 +1656,9 @@ function openAddModal(){
 }
 function openEditModal(f){
   editingId=f._id;
-  mTitle.textContent='编辑自定义公式';
-  document.getElementById('cOk').textContent='保存修改';
-  document.getElementById('cName').value=f.name;
+  mTitle.textContent=t('编辑自定义公式');
+  document.getElementById('cOk').textContent=t('保存修改');
+  document.getElementById('cName').value=t(f.name);
   document.getElementById('cPlain').value=f.plain;
   document.getElementById('cLatex').value=f.latex||'';
   fillCatOptions();
@@ -1456,16 +1671,16 @@ document.getElementById('cCancel').addEventListener('click',()=>modal.classList.
 document.getElementById('cOk').addEventListener('click',()=>{
   const name=document.getElementById('cName').value.trim();
   const plain=document.getElementById('cPlain').value.trim();
-  if(!name||!plain){toast('名称与公式不能为空');return;}
+  if(!name||!plain){toast(t('名称与公式不能为空'));return;}
   const cat=document.getElementById('cCat').value;
   const latex=document.getElementById('cLatex').value.trim();
   if(editingId!=null){
     const c=customs.find(x=>x._id===editingId);
     if(c){c.name=name;c.cat=cat;c.plain=plain;c.latex=latex;}
-    toast('已保存修改');
+    toast(t('已保存修改'));
   }else{
     customs.push({_id:'c'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name:name,cat:cat,aliases:[],plain:plain,latex:latex,symbols:[],params:[]});
-    toast('已添加自定义公式');
+    toast(t('已添加自定义公式'));
   }
   localStorage.setItem('fl_custom',JSON.stringify(customs));
   modal.classList.add('hidden');
@@ -1476,12 +1691,12 @@ function handleDelete(card,f,btn){
     customs=customs.filter(x=>x._id!==f._id);
     localStorage.setItem('fl_custom',JSON.stringify(customs));
     refreshAll();renderCats();renderList();
-    toast('已删除「'+f.name+'」');
+    toast(tf('已删除「{x}」',{x:t(f.name)}));
     return;
   }
   btn.classList.add('confirm');
-  btn.textContent='确认删除?';
-  setTimeout(()=>{btn.classList.remove('confirm');btn.textContent='🗑 删除';},3000);
+  btn.textContent=t('确认删除?');
+  setTimeout(()=>{btn.classList.remove('confirm');btn.textContent='🗑 '+t('删除');},3000);
 }
 modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden');});
 
@@ -1492,13 +1707,13 @@ function calcUpdate(){
   const inp=document.getElementById('calcIn');
   const out=document.getElementById('calcOut');
   const raw=inp.value.trim();
-  if(!raw){out.textContent='输入表达式后自动计算';out.className='cval pending';return;}
+  if(!raw){out.textContent=t('输入表达式后自动计算');out.className='cval pending';return;}
   let val;
   try{val=evalExpr(raw,{});}catch(err){val=NaN;}
   const sig=parseInt(document.getElementById('sig').value,10)||3;
   const txt=fmtSig(val,sig);
   if(txt!==null){out.textContent='= '+txt;out.className='cval';}
-  else{out.textContent='无法计算，请检查表达式';out.className='cval pending';}
+  else{out.textContent=t('无法计算，请检查表达式');out.className='cval pending';}
 }
 document.getElementById('calcIn').addEventListener('input',calcUpdate);
 document.getElementById('calc').addEventListener('click',e=>{
@@ -1523,6 +1738,15 @@ document.getElementById('themeSwitch').addEventListener('click',e=>{
 });
 
 /* =====================================================================
+   语言切换
+   ===================================================================== */
+document.getElementById('langSwitch').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-lang]');
+  if(!b)return;
+  setLang(b.dataset.lang);
+});
+
+/* =====================================================================
    回到顶部 + 键盘快捷键
    ===================================================================== */
 mainEl.addEventListener('scroll',()=>{backTop.classList.toggle('show',mainEl.scrollTop>300);});
@@ -1532,7 +1756,7 @@ function isTyping(e){
   return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);
 }
 addEventListener('keydown',e=>{
-  if(e.key==='Escape'){modal.classList.add('hidden');return;}
+  if(e.key==='Escape'){modal.classList.add('hidden');if(typeof importModal!=='undefined')importModal.classList.add('hidden');return;}
   if(e.key==='/'&&!isTyping(e)){e.preventDefault();document.getElementById('q').focus();return;}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('q').focus();}
 });
@@ -1540,8 +1764,8 @@ addEventListener('keydown',e=>{
 /* =====================================================================
    美化器事件
    ===================================================================== */
-bIn.addEventListener('input',beautyUpdate);
-bSmart.addEventListener('change',beautyUpdate);
+bIn.addEventListener('input',()=>{beautyUpdate();applyI18nStatic();});
+bSmart.addEventListener('change',()=>{beautyUpdate();applyI18nStatic();});
 document.getElementById('bex').addEventListener('click',e=>{
   const b=e.target.closest('button[data-ex]');
   if(b){bIn.value=b.dataset.ex;beautyUpdate();}
@@ -1551,19 +1775,19 @@ document.getElementById('beauty').addEventListener('click',e=>{
   if(!b)return;
   const fmt=b.dataset.bcopy;
   const plain=document.getElementById('bPlain').textContent;
-  if(!plain){toast('请先输入公式');return;}
-  if(fmt==='plain')copyText(plain,'已复制：标准文本（Word/WPS 公式模式中粘贴即公式）');
-  else if(fmt==='latex')copyText(document.getElementById('bLatex').textContent,'已复制：LaTeX');
+  if(!plain){toast(t('请先输入公式'));return;}
+  if(fmt==='plain')copyText(plain,t('已复制：标准文本（Word/WPS 公式模式中粘贴即公式）'));
+  else if(fmt==='latex')copyText(document.getElementById('bLatex').textContent,t('已复制：LaTeX'));
   else if(fmt==='mathml'){
     const mml=document.getElementById('bMM').textContent;
-    if(!mml){toast('公式无法生成，请检查输入');return;}
-    copyRich('<html xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"><body><p><m:oMathPara>'+mml+'</m:oMathPara></p></body></html>',plain,'已复制：Word 公式（Word 直粘；WPS 请用标准文本或 LaTeX）');
+    if(!mml){toast(t('公式无法生成，请检查输入'));return;}
+    copyRich('<html xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"><body><p><m:oMathPara>'+mml+'</m:oMathPara></p></body></html>',plain,t('已复制：Word 公式（Word 直粘；WPS 请用标准文本或 LaTeX）'));
   }
   flashCopied(b);
 });
 document.getElementById('bSave').addEventListener('click',()=>{
   const plain=document.getElementById('bPlain').textContent;
-  if(!plain){toast('请先输入公式');return;}
+  if(!plain){toast(t('请先输入公式'));return;}
   openAddModal();
   document.getElementById('cPlain').value=plain;
   document.getElementById('cLatex').value=document.getElementById('bLatex').textContent;
@@ -1579,8 +1803,423 @@ refreshAll();
   const saved=localStorage.getItem('fl_theme');
   applyTheme(THEMES.includes(saved)?saved:'dark');
 })();
+initLang();
 renderCats();
 renderList();
+
+/* =====================================================================
+   批量导入公式
+   支持：直接粘贴 / .txt .md / .csv（表头自动识别） / .json
+         .docx（ZIP + DecompressionStream 解压取文本）
+         .xlsx（读 sharedStrings + sheet1）
+   写法容错：名称 | 公式 ／ 名称 | 分类 | 公式 ／ 名称 | 分类 | 公式 | LaTeX
+             名称：公式 ／ 名称=含=的公式 ／ 只有公式 ／ 带序号的行
+   ===================================================================== */
+
+const importModal = document.getElementById('importModal');
+let imRows = [];          // 解析结果
+let imSource = 'paste';   // paste | file
+let imFileText = '';
+let imFileKind = 'text';  // text | csv | json
+
+/* ---------- 打开 / 关闭 ---------- */
+function fillImportCats(){
+  const sel = document.getElementById('imCat');
+  sel.innerHTML = CATS.map(c => '<option value="' + esc(c) + '">' + esc(t(c)) + '</option>').join('')
+    + '<option value="自定义">' + esc(t('自定义')) + '</option>';
+  sel.value = CATS.includes(catSel) ? catSel : '自定义';
+}
+
+function openImport(){
+  imRows = [];
+  imSource = 'paste';
+  imFileText = '';
+  document.getElementById('imText').value = '';
+  document.getElementById('imFileName').textContent = t('支持 .txt / .md / .csv / .json / .docx / .xlsx');
+  document.getElementById('imInput').value = '';
+  fillImportCats();
+  imSetTab('paste');
+  imPreview();
+  importModal.classList.remove('hidden');
+  setTimeout(() => document.getElementById('imText').focus(), 60);
+}
+
+function imSetTab(tab){
+  imSource = tab;
+  document.getElementById('imTabs').querySelectorAll('button').forEach(b =>
+    b.classList.toggle('active', b.dataset.imtab === tab));
+  document.getElementById('imPanePaste').classList.toggle('hidden', tab !== 'paste');
+  document.getElementById('imPaneFile').classList.toggle('hidden', tab !== 'file');
+}
+
+/* ---------- 文本解析 ---------- */
+function stripLead(s){
+  return s.replace(/^\s*(?:\d+\s*[.、)\]:：]|[-*•·])\s*/, '').trim();
+}
+
+/* 把一行拆成字段 */
+function splitFields(line){
+  const s = stripLead(line);
+  if (!s) return null;
+  if (/^[#/]{1,2}\s/.test(s)) return null;               // 注释行
+  if (/[|｜\t]/.test(s)) {
+    return s.split(/[|｜\t]/).map(x => x.trim()).filter((x, i, a) => !(x === '' && i === a.length - 1));
+  }
+  // 名称：公式 / 名称: 公式
+  const mc = /^([^：:]{1,60}?)\s*[：:]\s*(.+)$/.exec(s);
+  if (mc && /[=+×*/^√]/.test(mc[2])) return [mc[1].trim(), mc[2].trim()];
+  // 名称 空格 公式（公式里含 = ）
+  const ms = /^([\u4e00-\u9fffA-Za-z][\u4e00-\u9fffA-Za-z0-9·\-\s]{0,40}?)\s+([^\s].*[=+×*/^√].*)$/.exec(s);
+  if (ms && ms[1].trim().length <= 40) return [ms[1].trim(), ms[2].trim()];
+  // 只有公式
+  if (/[=+×*/^√]/.test(s)) return [s, s];
+  return null;
+}
+
+function fieldsToRow(fields, line, defaultCat){
+  if (!fields || fields.length < 1) return { line: line, ok: false, reason: '行格式无法识别' };
+  let name, cat, plain, latex = '';
+  if (fields.length === 1) { name = fields[0]; plain = fields[0]; cat = defaultCat; }
+  else if (fields.length === 2) { name = fields[0]; plain = fields[1]; cat = defaultCat; }
+  else if (fields.length === 3) { name = fields[0]; cat = fields[1] || defaultCat; plain = fields[2]; }
+  else { name = fields[0]; cat = fields[1] || defaultCat; plain = fields[2]; latex = fields[3] || ''; }
+  name = (name || '').trim(); plain = (plain || '').trim(); cat = (cat || defaultCat).trim();
+  if (!name || !plain) return { line: line, ok: false, reason: '名称 / 公式 为空' };
+  return { line: line, name: name, cat: cat, plain: plain, latex: latex, ok: true };
+}
+
+/* 判断一行是否是表头（名称/分类/公式/LaTeX 之类） */
+function looksLikeHeader(fields){
+  if (!fields || fields.length < 2) return false;
+  const KEY = ['名称', '名字', 'name', 'title', '分类', '类别', 'category', 'cat', '公式', '表达式', 'formula', 'expression', 'plain', 'latex', 'tex'];
+  let hit = 0;
+  for (const f of fields) {
+    const v = String(f).trim().toLowerCase();
+    if (!v) continue;
+    if (KEY.some(k => v === k || v.indexOf(k) >= 0)) hit++;
+  }
+  return hit >= 2;
+}
+
+function parseLines(text, defaultCat){
+  const rows = [];
+  let first = true;
+  for (const raw of text.split(/\r?\n/)) {
+    if (!raw.trim()) continue;
+    const f = splitFields(raw);
+    if (first && looksLikeHeader(f)) { first = false; continue; }
+    first = false;
+    rows.push(fieldsToRow(f, raw.trim().slice(0, 120), defaultCat));
+  }
+  return rows;
+}
+
+/* CSV：支持引号、逗号/分号/制表符，自动识别表头 */
+function csvSplit(line, sep){
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (q) {
+      if (c === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+      else cur += c;
+    } else if (c === '"') q = true;
+    else if (c === sep) { out.push(cur); cur = ''; }
+    else cur += c;
+  }
+  out.push(cur);
+  return out.map(x => x.trim());
+}
+
+function parseCSV(text, defaultCat){
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return [];
+  const sep = lines[0].includes('\t') ? '\t' : (lines[0].split(',').length >= lines[0].split(';').length ? ',' : ';');
+  const head = csvSplit(lines[0], sep).map(h => h.toLowerCase());
+  const KEY = {
+    name: ['名称', '名字', 'name', 'title', '公式名称'],
+    cat: ['分类', '类别', 'category', 'cat', '科目'],
+    plain: ['公式', '表达式', 'formula', 'expression', 'plain'],
+    latex: ['latex', 'tex']
+  };
+  const idx = {};
+  let hasHead = false;
+  for (const k in KEY) {
+    idx[k] = head.findIndex(h => KEY[k].some(w => h === w || h.indexOf(w) >= 0));
+    if (idx[k] >= 0) hasHead = true;
+  }
+  const body = hasHead ? lines.slice(1) : lines;
+  if (!hasHead) { idx.name = 0; idx.cat = 1; idx.plain = 2; idx.latex = 3; }
+  const rows = [];
+  for (const line of body) {
+    const f = csvSplit(line, sep);
+    const v = k => (idx[k] >= 0 && f[idx[k]] !== undefined) ? f[idx[k]] : '';
+    const name = v('name'), plain = v('plain');
+    const cat = v('cat') || defaultCat;
+    if (!name && !plain) continue;
+    if (!name || !plain) { rows.push({ line: line.slice(0, 120), ok: false, reason: '名称 / 公式 为空' }); continue; }
+    rows.push({ line: '', name: name, cat: cat, plain: plain, latex: v('latex'), ok: true });
+  }
+  return rows;
+}
+
+/* JSON：数组，或缺省导出格式 */
+function parseJSON(text, defaultCat){
+  let data;
+  try { data = JSON.parse(text); } catch (e) { return null; }
+  if (!Array.isArray(data)) {
+    if (data && Array.isArray(data.formulas)) data = data.formulas;
+    else if (data && typeof data === 'object') data = [data];
+    else return null;
+  }
+  const rows = [];
+  for (const it of data) {
+    if (typeof it === 'string') { rows.push(fieldsToRow([it, it], '', defaultCat)); continue; }
+    if (!it || typeof it !== 'object') { rows.push({ line: '', ok: false, reason: '行格式无法识别' }); continue; }
+    const name = String(it.name || it.title || it['名称'] || '').trim();
+    const plain = String(it.plain || it.formula || it.expression || it['公式'] || '').trim();
+    const cat = String(it.cat || it.category || it['分类'] || '').trim() || defaultCat;
+    const latex = String(it.latex || it.tex || it['LaTeX'] || '').trim();
+    if (!name || !plain) { rows.push({ line: '', ok: false, reason: '名称 / 公式 为空' }); continue; }
+    rows.push({ line: '', name: name, cat: cat, plain: plain, latex: latex, ok: true });
+  }
+  return rows;
+}
+
+/* ---------- ZIP（用于 docx / xlsx）---------- */
+async function unzipText(buf, matcher){
+  const dv = new DataView(buf);
+  const dec = new TextDecoder('utf-8');
+  let eocd = -1;
+  const lo = Math.max(0, buf.byteLength - 65558);
+  for (let i = buf.byteLength - 22; i >= lo; i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('not a zip');
+  const count = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  for (let i = 0; i < count; i++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const compSize = dv.getUint32(p + 20, true);
+    const nameLen = dv.getUint16(p + 28, true);
+    const extraLen = dv.getUint16(p + 30, true);
+    const commentLen = dv.getUint16(p + 32, true);
+    const localOff = dv.getUint32(p + 42, true);
+    const name = dec.decode(new Uint8Array(buf, p + 46, nameLen));
+    if (matcher(name)) {
+      const lnl = dv.getUint16(localOff + 26, true);
+      const lel = dv.getUint16(localOff + 28, true);
+      const dataOff = localOff + 30 + lnl + lel;
+      const data = new Uint8Array(buf, dataOff, compSize);
+      if (method === 0) return dec.decode(data);
+      if (method === 8 && typeof DecompressionStream === 'function') {
+        const st = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        return await new Response(st).text();
+      }
+      throw new Error('unsupported zip method ' + method);
+    }
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  throw new Error('entry not found');
+}
+
+function xmlUnescape(s){
+  return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'").replace(/&#(\d+);/g, (m, d) => String.fromCharCode(+d))
+          .replace(/&amp;/g, '&');
+}
+
+/* docx -> 每段一行纯文本 */
+async function docxToText(buf){
+  const xml = await unzipText(buf, n => n === 'word/document.xml');
+  return xml
+    .replace(/<w:tab\b[^>]*\/>/g, '\t')
+    .replace(/<w:br\b[^>]*\/>/g, '\n')
+    .replace(/<\/w:p>/g, '\n')
+    .replace(/<[^>]+>/g, '')
+    .split('\n')
+    .map(l => xmlUnescape(l).trim())
+    .join('\n');
+}
+
+/* xlsx -> 制表符分隔文本（第一行当表头） */
+async function xlsxToText(buf){
+  let strings = [];
+  try {
+    const ss = await unzipText(buf, n => /^xl\/sharedStrings\.xml$/.test(n));
+    strings = [...ss.matchAll(/<si>([\s\S]*?)<\/si>/g)]
+      .map(m => xmlUnescape(m[1].replace(/<[^>]+>/g, '')));
+  } catch (e) {}
+  const sheet = await unzipText(buf, n => /^xl\/worksheets\/sheet1\.xml$/.test(n));
+  const out = [];
+  for (const rm of sheet.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)) {
+    const cells = [];
+    for (const cm of rm[1].matchAll(/<c([^>]*)>([\s\S]*?)<\/c>/g)) {
+      const attrs = cm[1];
+      const vm = /<v>([\s\S]*?)<\/v>/.exec(cm[2]);
+      const im = /<is>([\s\S]*?)<\/is>/.exec(cm[2]);
+      let val = '';
+      if (im) val = xmlUnescape(im[1].replace(/<[^>]+>/g, ''));
+      else if (vm) {
+        val = xmlUnescape(vm[1]);
+        if (/t="s"/.test(attrs)) val = strings[parseInt(val, 10)] || '';
+      }
+      cells.push(val);
+    }
+    out.push(cells.join('\t'));
+  }
+  return out.join('\n');
+}
+
+/* ---------- 解析入口 ---------- */
+function imDefaultCat(){
+  const s = document.getElementById('imCat');
+  return s && s.value ? s.value : '自定义';
+}
+
+function imParse(text, kind){
+  const cat = imDefaultCat();
+  if (!text || !text.trim()) return [];
+  if (kind === 'csv') { const r = parseCSV(text, cat); return r; }
+  if (kind === 'json') { const r = parseJSON(text, cat); return r || parseLines(text, cat); }
+  return parseLines(text, cat);
+}
+
+/* ---------- 预览 ---------- */
+function imPreview(){
+  const tbl = document.getElementById('imTable');
+  const stat = document.getElementById('imStat');
+  const total = imRows.length;
+  const bad = imRows.filter(r => !r.ok).length;
+  const good = total - bad;
+
+  if (!total) {
+    stat.textContent = t('实时预览');
+    tbl.innerHTML = '';
+    return;
+  }
+  stat.innerHTML = tf('已识别 {n} 条', { n: '<b>' + good + '</b>' })
+    + (bad ? '<span class="warn">' + tf('，{m} 行无法识别', { m: bad }) + '</span>' : '');
+
+  const head = '<tr><th>' + esc(t('名称')) + '</th><th>' + esc(t('分类')) + '</th><th>' + esc(t('公式')) + '</th></tr>';
+  const rows = imRows.slice(0, 300).map(r => r.ok
+    ? '<tr><td class="imname">' + esc(t(r.name)) + '</td><td>' + esc(t(r.cat)) + '</td><td class="imformula">' + esc(r.plain) + '</td></tr>'
+    : '<tr class="bad"><td colspan="3">⚠ ' + esc(r.reason ? t(r.reason) : '') + (r.line ? esc('  ·  ' + r.line) : '') + '</td></tr>'
+  ).join('');
+  tbl.innerHTML = head + rows;
+}
+
+/* ---------- 导入 ---------- */
+function doImport(){
+  const dup = document.getElementById('imDup').value;
+  const good = imRows.filter(r => r.ok);
+  if (!good.length) { toast(t('没有可导入的公式')); return; }
+  let added = 0, skipped = 0, overwritten = 0;
+  for (const r of good) {
+    const same = customs.find(c => c.name === r.name);
+    if (same) {
+      if (dup === 'skip') { skipped++; continue; }
+      if (dup === 'overwrite') {
+        same.cat = r.cat; same.plain = r.plain;
+        if (r.latex) same.latex = r.latex;
+        overwritten++;
+        continue;
+      }
+    }
+    customs.push({
+      _id: 'c' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      name: r.name, cat: r.cat, aliases: [], plain: r.plain,
+      latex: r.latex || '', symbols: [], params: []
+    });
+    added++;
+  }
+  localStorage.setItem('fl_custom', JSON.stringify(customs));
+  importModal.classList.add('hidden');
+  refreshAll(); renderCats(); renderList();
+  let msg = tf('已导入 {n} 条公式', { n: added });
+  if (skipped) msg += tf('，跳过 {n} 条重复', { n: skipped });
+  if (overwritten) msg += tf('，覆盖 {n} 条同名', { n: overwritten });
+  toast(msg);
+}
+
+/* ---------- 模板 ---------- */
+function downloadTemplate(){
+  const head = '名称,分类,公式,LaTeX\n';
+  const rows = [
+    '一元二次方程求根公式,数学·代数,x = (-b ± √(b²-4ac))/(2a),x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}',
+    '欧姆定律,物理·电学,I = U/R,I=\\frac{U}{R}',
+    '动能,物理·力学,Ek = ½mv²,E_k=\\frac{1}{2}mv^2'
+  ].join('\n');
+  const txt = '\uFEFF' + head + rows + '\n';
+  const blob = new Blob([txt], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (LANG === 'en' ? 'formula-import-template.csv' : '公式导入模板.csv');
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  toast(t('模板已下载'));
+}
+
+/* ---------- 事件 ---------- */
+document.getElementById('importBtn').addEventListener('click', openImport);
+document.getElementById('imCancel').addEventListener('click', () => importModal.classList.add('hidden'));
+document.getElementById('imOk').addEventListener('click', doImport);
+document.getElementById('imTemplate').addEventListener('click', downloadTemplate);
+
+document.getElementById('imTabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-imtab]');
+  if (!b) return;
+  imSetTab(b.dataset.imtab);
+});
+
+document.getElementById('imText').addEventListener('input', e => {
+  imRows = imParse(e.target.value, 'text');
+  imPreview();
+});
+
+document.getElementById('imCat').addEventListener('change', () => {
+  if (imSource === 'paste') imRows = imParse(document.getElementById('imText').value, 'text');
+  else if (imFileText) imRows = imParse(imFileText, imFileKind);
+  imPreview();
+});
+
+document.getElementById('imPick').addEventListener('click', () => document.getElementById('imInput').click());
+
+document.getElementById('imInput').addEventListener('change', async e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  document.getElementById('imFileName').textContent = file.name;
+  imFileText = '';
+  imFileKind = 'text';
+  try {
+    if (ext === 'docx') {
+      imFileText = await docxToText(await file.arrayBuffer());
+      imFileKind = 'text';
+    } else if (ext === 'xlsx') {
+      imFileText = await xlsxToText(await file.arrayBuffer());
+      imFileKind = 'csv';
+    } else if (ext === 'json') {
+      imFileText = await file.text();
+      imFileKind = 'json';
+    } else if (ext === 'csv' || ext === 'tsv') {
+      imFileText = await file.text();
+      imFileKind = 'csv';
+    } else {
+      imFileText = await file.text();
+      imFileKind = 'text';
+    }
+    if (!imFileText.trim()) { imRows = []; imPreview(); toast(t('文件为空')); return; }
+    imRows = imParse(imFileText, imFileKind);
+    imPreview();
+  } catch (err) {
+    imRows = []; imPreview();
+    toast(t('无法读取该文件'));
+  }
+});
+
+importModal.addEventListener('click', e => { if (e.target === importModal) importModal.classList.add('hidden'); });
 
 </script>
 </body>

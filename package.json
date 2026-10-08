@@ -1,8 +1,8 @@
 {
   "name": "formula-calculator",
   "productName": "公式计算器",
-  "version": "1.0.0",
-  "description": "物理数学公式计算器 — 离线公式搜索、美化与计算（Electron 桌面应用）",
+  "version": "1.1.0",
+  "description": "物理数学公式计算器 — 离线公式搜索、美化与计算（中英双语，支持文档批量导入）",
   "main": "main.js",
   "author": "Mr.Cui",
   "license": "MIT",
