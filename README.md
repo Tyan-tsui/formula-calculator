@@ -94,7 +94,3 @@ node tools/asar.js pack ./unpacked "<安装目录>/resources/app.asar"
 ## 📄 许可
 
 本项目基于 [MIT License](LICENSE) 开源，可自由使用、修改和分发。
-
-## 🙏 说明
-
-界面与功能最初借助 AI 助手（豆包）搭建，后经重构优化：新增三套主题、公式美化器增强、快速计算器、自定义公式编辑等功能。
